@@ -28,11 +28,13 @@ y en `window.PORTAL.informes` el objeto `id: 'facturacion'` con
 - Las semanas finales en cero se recortan (el mes en curso trae semanas futuras vacías).
 - `clientData` lleva además la clave `Acumulado` con la suma de todos los meses.
 
-## Criterio pendiente de confirmar con el cliente
+## Criterio de Intercompany (decidido, no cambiar)
 
-En la hoja `ACUMULADO`, la fila *Total Facturado* **no** suma Intercompany de enero a
-junio, pero **sí** de julio en adelante. La columna *Total 2026* sí lo suma siempre.
-El dashboard sigue el criterio de *Total 2026* (Suplec + Incomelec + Intercompany en
-todos los meses), que da un total anual de $30.269.270.998. Si se adoptara el criterio
-de *Total Facturado*, el año bajaría $922.681.132. No cambiar esto sin que el cliente
-lo decida.
+Intercompany **siempre suma**: el total de cada mes es Suplec + Incomelec + Intercompany,
+en los doce meses. Es el criterio de la columna *Total 2026* de la hoja `ACUMULADO` y da
+un total anual de $30.269.270.998.
+
+Ojo: la fila *Total Facturado* de esa misma hoja **no** suma Intercompany de enero a junio
+(sí de julio en adelante), así que no cuadra con el dashboard en esos meses. La diferencia
+es $922.681.132 en el año. Es una inconsistencia del Excel, no del dashboard: no "corregir"
+el dashboard para que coincida con esa fila.
