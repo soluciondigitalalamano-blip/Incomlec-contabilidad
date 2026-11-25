@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tareas Contabilidad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   DATOS — agregar las filas de cada mes nuevo al final de «tareas»;
+   los meses del filtro salen solos de la columna «fecha».
+   ═══════════════════════════════════════════════════════════════ */
+const DATA = {
+  meta: {
+    area: 'Contabilidad',
+    metaCumplimiento: 90,            // % — meta del panel ejecutivo INCOMELEC
+    fuente: 'Cronograma de tareas de Contabilidad (Excel)',
+  },
+  /* Identidad de cada persona. "foco" sale de la columna «Inicio» del Excel.
+     genero F/M, piel, pelo y ropa definen el avatar ilustrado (no es un retrato). */
+  personas: {
+    Deisy:    { ini: 'DE', genero: 'F', piel: '#F1C7A3', pelo: '#3B2A20', ropa: '#1E7A46', foco: 'Requerimientos, pagos y prioridades del equipo', rol: 'Coordina las 3 empresas', bg: 'oklch(0.92 0.05 150)', fg: 'oklch(0.32 0.09 152)' },
+    Jeymy:    { ini: 'JE', genero: 'F', piel: '#E6B089', pelo: '#1F1A17', ropa: '#2F6FD6', foco: 'Facturas, proveedores y Cifrato',               rol: 'Compras y Cifrato',       bg: 'oklch(0.92 0.04 250)', fg: 'oklch(0.36 0.11 255)' },
+    Leonardo: { ini: 'LE', genero: 'M', piel: '#D9A07A', pelo: '#2A211C', ropa: '#C9821E', foco: 'Cartera y facturación',                          rol: 'Cartera y facturación',   bg: 'oklch(0.93 0.05 80)',  fg: 'oklch(0.40 0.09 65)'  },
+    Paula:    { ini: 'PA', genero: 'F', piel: '#F3CBA6', pelo: '#7A4A2A', ropa: '#8C4FC9', foco: 'Solicitudes y novedades de pagos',              rol: 'Pagos, egresos y caja',   bg: 'oklch(0.92 0.04 320)', fg: 'oklch(0.38 0.11 320)' }
+  },
+  /* Sin logos propios entregados para Suplec y Parqueoo → monograma. */
+  empresas: {
+    Incomelec: { ini: 'IN' },
+    Suplec:    { ini: 'SU' },
+    Parqueoo:  { ini: 'PQ' }
+  },
+  /* Una fila por tarea, igual que el Excel. "fila" = número de fila en la hoja. */
+  tareas: [
+    {"fila": 4, "fecha": "2026-09-01", "dia": "martes", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Revisar informes de recibos de caja y egresos", "ent": "Informe diario revisado", "cierre": "16:30 revisar avances del equipo y temas pendientes", "estado": "Completada"},
+    {"fila": 5, "fecha": "2026-09-01", "dia": "martes", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Facturas de compra en Cifrato", "ent": "Reporte Cifrato al día", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 6, "fecha": "2026-09-01", "dia": "martes", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Certificados de retencion clientes+ Facturas de venta", "ent": "Auxiliar vs certificados del bimestre, tabla consolidado año", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 7, "fecha": "2026-09-01", "dia": "martes", "resp": "Paula", "empresa": "Parqueoo", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Facturas de compra- Comprobantes de egreso -recibos de caja", "ent": "Documento costo de ventas", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 8, "fecha": "2026-09-02", "dia": "miércoles", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Validar cuentas por pagar y por cobrar- Revision inventario", "ent": "Reporte validado", "cierre": "16:30 revisar avances del equipo y temas pendientes", "estado": "Completada"},
+    {"fila": 9, "fecha": "2026-09-02", "dia": "miércoles", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Sincronización de Cifrato", "ent": "Reporte Cifrato al día", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 10, "fecha": "2026-09-02", "dia": "miércoles", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Facturas de venta+ Creacion centros de costo", "ent": "Dejar observacion en el cuadro de control", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 11, "fecha": "2026-09-02", "dia": "miércoles", "resp": "Paula", "empresa": "Parqueoo", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Facturas de venta-Comprobantes de egreso -recibos de caja", "ent": "", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 12, "fecha": "2026-09-03", "dia": "jueves", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Revisar clientes morosos y provisiones", "ent": "Seguimiento de cartera", "cierre": "16:30 revisar avances del equipo y temas pendientes", "estado": "Completada"},
+    {"fila": 13, "fecha": "2026-09-03", "dia": "jueves", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Cargar facturas del exterior en Cifrato", "ent": "Reporte Cifrato al día", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 14, "fecha": "2026-09-03", "dia": "jueves", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Facturas de venta+ Creacion centros de costo", "ent": "Envio correo a comercial", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 15, "fecha": "2026-09-03", "dia": "jueves", "resp": "Paula", "empresa": "Incomelec", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Conciliación de anticipos a proveedores-Comprobantes de egreso -recibos de caja", "ent": "Correo a Compras con auxiliar", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 16, "fecha": "2026-09-04", "dia": "viernes", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:00 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Revisar borradores de retenciones, IVA e impuestos + Preparar informe de cartera -Revision inventario", "ent": "Borradores revisados + Informe de cartera", "cierre": "01:00 revisar avances del equipo y pendientes", "estado": "Completada"},
+    {"fila": 17, "fecha": "2026-09-04", "dia": "viernes", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:00 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Conciliación Radian + Preparar informe de facturación", "ent": "Auxiliar vs. Radian + Informe de facturación", "cierre": "01:00 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 18, "fecha": "2026-09-04", "dia": "viernes", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Cartera y soportes de pago + Facturas de venta+ Preparar informe de cartera", "ent": "Papel de trabajo", "cierre": "01:00 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 19, "fecha": "2026-09-04", "dia": "viernes", "resp": "Paula", "empresa": "Incomelec", "inicio": "07:00 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Legalización de gastos de viaje +Comprobantes de egreso -recibos de caja", "ent": "Nota contable + Informe de cartera", "cierre": "01:00 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 20, "fecha": "2026-09-07", "dia": "lunes", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Actualizar cronograma diario del equipo- Curso de IA de 2-5 pm", "ent": "Cronograma actualizado", "cierre": "16:30 revisar avances del equipo y temas pendientes", "estado": "Completada"},
+    {"fila": 21, "fecha": "2026-09-07", "dia": "lunes", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Caja menor + Actualizar estados de cuenta", "ent": "Nota contable vs. auxiliar + Estados de cuenta actualizados", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 22, "fecha": "2026-09-07", "dia": "lunes", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Seguimiento de clientes +Facturas de venta", "ent": "Seguimiento de cartera", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 23, "fecha": "2026-09-07", "dia": "lunes", "resp": "Paula", "empresa": "Incomelec", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Conciliación Radian+Comprobantes de egreso -recibos de caja", "ent": "Auxiliar vs. Radian", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 24, "fecha": "2026-09-08", "dia": "martes", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Revisar requerimientos de las demás áreas", "ent": "Solicitudes priorizadas", "cierre": "16:30 revisar avances del equipo y temas pendientes", "estado": "Completada"},
+    {"fila": 25, "fecha": "2026-09-08", "dia": "martes", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Viáticos", "ent": "Nota contable vs. auxiliar", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 26, "fecha": "2026-09-08", "dia": "martes", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Certificados de retencion clientes +Facturas de venta", "ent": "Auxiliar vs certificados del bimestre, tabla consolidado año", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 27, "fecha": "2026-09-08", "dia": "martes", "resp": "Paula", "empresa": "Incomelec", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Certificados de retención de clientes +Comprobantes de egreso -recibos de caja", "ent": "Auxiliar y consolidado anual", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 28, "fecha": "2026-09-09", "dia": "miércoles", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Revisar muestras de inventarios", "ent": "Muestra revisada", "cierre": "16:30 revisar avances del equipo y temas pendientes", "estado": "Completada"},
+    {"fila": 29, "fecha": "2026-09-09", "dia": "miércoles", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Revisión de facturas de compra", "ent": "Auxiliar vs. Radian", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 30, "fecha": "2026-09-09", "dia": "miércoles", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Creacion centros de costo+Facturas de venta", "ent": "Dejar observacion en el cuadro de control", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 31, "fecha": "2026-09-09", "dia": "miércoles", "resp": "Paula", "empresa": "Incomelec", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Seguimiento de pólizas+Comprobantes de egreso -recibos de caja", "ent": "Control de pólizas actualizado", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 32, "fecha": "2026-09-10", "dia": "jueves", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Revisar muestras de facturas", "ent": "Muestra revisada", "cierre": "16:30 revisar avances del equipo y temas pendientes", "estado": "Completada"},
+    {"fila": 33, "fecha": "2026-09-10", "dia": "jueves", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Creación de clientes y proveedores", "ent": "Maestro actualizado", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 34, "fecha": "2026-09-10", "dia": "jueves", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Facturas de venta + Revision F2x", "ent": "Envio correo a comercial", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Pendiente"},
+    {"fila": 35, "fecha": "2026-09-10", "dia": "jueves", "resp": "Paula", "empresa": "Parqueoo", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Comprobantes de egreso -recibos de caja", "ent": "Documento costo de ventas", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 36, "fecha": "2026-09-11", "dia": "viernes", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:00 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Revisar muestras de clientes + Preparar informe de cartera Revision + inventario", "ent": "Muestra revisada + Informe de cartera", "cierre": "01:00 revisar avances del equipo y pendientes", "estado": "Completada"},
+    {"fila": 37, "fecha": "2026-09-11", "dia": "viernes", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:00 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Validación de documentos de clientes y proveedores + Preparar informe de facturación", "ent": "Expedientes completos + Informe de facturación", "cierre": "01:00 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 38, "fecha": "2026-09-11", "dia": "viernes", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Cartera y soportes de pago +Facturas de venta+ Preparar informe de cartera", "ent": "Papel de trabajo", "cierre": "01:00 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 39, "fecha": "2026-09-11", "dia": "viernes", "resp": "Paula", "empresa": "Parqueoo", "inicio": "07:00 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Comprobantes de egreso -recibos de caja + Trajetas de credito", "ent": "Planilla junto con el auxiliar + Informe de cartera", "cierre": "01:00 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 40, "fecha": "2026-09-14", "dia": "lunes", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Revisar muestras de proveedores- Curso de IA de 2-5 pm", "ent": "Muestra revisada", "cierre": "16:30 revisar avances del equipo y temas pendientes", "estado": "Completada"},
+    {"fila": 41, "fecha": "2026-09-14", "dia": "lunes", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Cruce de anticipos a proveedores + Actualizar estados de cuenta", "ent": "Correo a Compras con auxiliar + Estados de cuenta actualizados", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 42, "fecha": "2026-09-14", "dia": "lunes", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Seguimiento de clientes +Facturas de venta", "ent": "Seguimiento de cartera", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 43, "fecha": "2026-09-14", "dia": "lunes", "resp": "Paula", "empresa": "Incomelec", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Conciliación de anticipos a proveedores+Comprobantes de egreso -recibos de caja", "ent": "Correo a Compras con auxiliar", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 44, "fecha": "2026-09-15", "dia": "martes", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 Capacitacion liderazgo", "act": "Preparar o atender informes a revisoría fiscal", "ent": "Informe o respuesta preparada", "cierre": "16:30 revisar avances del equipo y temas pendientes", "estado": "Completada"},
+    {"fila": 45, "fecha": "2026-09-15", "dia": "martes", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Facturas de compra del exterior", "ent": "Estado de cuenta vs. auxiliar", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 46, "fecha": "2026-09-15", "dia": "martes", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Certificados de retencion clientes +Facturas de venta", "ent": "Auxiliar vs certificados del bimestre, tabla consolidado año", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 47, "fecha": "2026-09-15", "dia": "martes", "resp": "Paula", "empresa": "Incomelec", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Legalización de gastos de viaje +Comprobantes de egreso -recibos de caja", "ent": "Nota contable", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 48, "fecha": "2026-09-16", "dia": "miércoles", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Revision cuentas de acticipos", "ent": "Auxiliar cartera", "cierre": "16:30 revisar avances del equipo y temas pendientes", "estado": "Completada"},
+    {"fila": 49, "fecha": "2026-09-16", "dia": "miércoles", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Facturas de compra en Cifrato", "ent": "Reporte Cifrato al día", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 50, "fecha": "2026-09-16", "dia": "miércoles", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Creacion centros de costo +Facturas de venta-Preparcion impuestos Iva, retencion Y ica", "ent": "Dejar observacion en el cuadro de control", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 51, "fecha": "2026-09-16", "dia": "miércoles", "resp": "Paula", "empresa": "Incomelec", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Conciliación Radian + Comprobantes de egreso -recibos de caja", "ent": "Auxiliar vs. Radian", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 52, "fecha": "2026-09-17", "dia": "jueves", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Revisar solicitudes de pago- Reunion Zona p conciliacion", "ent": "Solicitudes validadas", "cierre": "16:30 revisar avances del equipo y temas pendientes", "estado": "Completada"},
+    {"fila": 53, "fecha": "2026-09-17", "dia": "jueves", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Sincronización de Cifrato", "ent": "Reporte Cifrato al día", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 54, "fecha": "2026-09-17", "dia": "jueves", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Creacion centros de costo +Facturas de venta-Preparcion impuestos Iva, retencion Y ica", "ent": "Envio correo a comercial", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 55, "fecha": "2026-09-17", "dia": "jueves", "resp": "Paula", "empresa": "Incomelec", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Comprobantes de egreso -recibos de caja", "ent": "Auxiliar y consolidado anual", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 56, "fecha": "2026-09-18", "dia": "viernes", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:00 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Gestionar pagos en exceso + Preparar informe de cartera+ Revision inventario", "ent": "Solicitud de devolución o compensación + Informe de cartera", "cierre": "01:00 revisar avances del equipo y pendientes", "estado": "Completada"},
+    {"fila": 57, "fecha": "2026-09-18", "dia": "viernes", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:00 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Cargar facturas del exterior en Cifrato + Preparar informe de facturación", "ent": "Reporte Cifrato al día + Informe de facturación", "cierre": "01:00 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 58, "fecha": "2026-09-18", "dia": "viernes", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Creacion centros de costo +Facturas de venta-Preparcion impuestos Iva, retencion Y ica", "ent": "Papel de trabajo", "cierre": "01:00 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 59, "fecha": "2026-09-18", "dia": "viernes", "resp": "Paula", "empresa": "Incomelec", "inicio": "07:00 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Seguimiento de pólizas + Comprobantes de egreso -recibos de caja -preparcion iva y retencion Parqueoo", "ent": "Control de pólizas actualizado + Informe de cartera", "cierre": "01:00 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 60, "fecha": "2026-09-21", "dia": "lunes", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Validar pendientes y riesgos del día- Curso de IA de 2-5 pm", "ent": "Plan de acción actualizado", "cierre": "16:30 revisar avances del equipo y temas pendientes", "estado": "Completada"},
+    {"fila": 61, "fecha": "2026-09-21", "dia": "lunes", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Conciliación Radian + Actualizar estados de cuenta", "ent": "Auxiliar vs. Radian + Estados de cuenta actualizados", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 62, "fecha": "2026-09-21", "dia": "lunes", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Creacion centros de costo +Facturas de venta-Preparcion impuestos Iva, retencion Y ica", "ent": "Papel de trabajo impuestos", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 63, "fecha": "2026-09-21", "dia": "lunes", "resp": "Paula", "empresa": "Parqueoo", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Comprobantes de egreso -recibos de caja -Presentacion Iva y retencion", "ent": "Documento costo de ventas", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 64, "fecha": "2026-09-22", "dia": "martes", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Revisión de balances+Revision inventario +Revision y presentacion impuestos", "ent": "Balance por terceros", "cierre": "16:30 revisar avances del equipo y temas pendientes", "estado": "Completada"},
+    {"fila": 65, "fecha": "2026-09-22", "dia": "martes", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Caja menor", "ent": "Nota contable vs. auxiliar", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 66, "fecha": "2026-09-22", "dia": "martes", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Creacion centros de costo +Facturas de venta-Preparcion impuestos Iva, retencion Y ica", "ent": "Papel de trabajo impuestos", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 67, "fecha": "2026-09-22", "dia": "martes", "resp": "Paula", "empresa": "Parqueoo", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Comprobantes de egreso -recibos de caja", "ent": "Planilla junto con el auxiliar", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 68, "fecha": "2026-09-23", "dia": "miércoles", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Control de documentos y consecutivos", "ent": "Control actualizado", "cierre": "16:30 revisar avances del equipo y temas pendientes", "estado": "Completada"},
+    {"fila": 69, "fecha": "2026-09-23", "dia": "miércoles", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Viáticos", "ent": "Nota contable vs. auxiliar", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 70, "fecha": "2026-09-23", "dia": "miércoles", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Creacion centros de costo", "ent": "Dejar observacion en el cuadro de control", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 71, "fecha": "2026-09-23", "dia": "miércoles", "resp": "Paula", "empresa": "Incomelec", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Conciliación de anticipos a proveedores", "ent": "auxiliar", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 72, "fecha": "2026-09-24", "dia": "jueves", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Validar soportes documentales de los registros+Revision inventario", "ent": "Muestra validada", "cierre": "16:30 revisar avances del equipo y temas pendientes", "estado": "Completada"},
+    {"fila": 73, "fecha": "2026-09-24", "dia": "jueves", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Revisión de facturas de compra", "ent": "Auxiliar vs. Radian", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 74, "fecha": "2026-09-24", "dia": "jueves", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Facturas de venta", "ent": "Envio correo a comercial", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 75, "fecha": "2026-09-24", "dia": "jueves", "resp": "Paula", "empresa": "Incomelec", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Comprobantes de egreso -recibos de caja", "ent": "Nota contable", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 76, "fecha": "2026-09-25", "dia": "viernes", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:00 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Revisar ingresos, egresos y facturas + Preparar informe de cartera", "ent": "Papeles de trabajo de impuestos + Informe de cartera", "cierre": "01:00 revisar avances del equipo y pendientes", "estado": "Completada"},
+    {"fila": 77, "fecha": "2026-09-25", "dia": "viernes", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:00 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Creación de clientes y proveedores + Preparar informe de facturación", "ent": "Maestro actualizado + Informe de facturación", "cierre": "01:00 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 78, "fecha": "2026-09-25", "dia": "viernes", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Cartera y soportes de pago+ Facturas de venta + Preparar informe de cartera", "ent": "Papel de trabajo", "cierre": "01:00 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 79, "fecha": "2026-09-25", "dia": "viernes", "resp": "Paula", "empresa": "Incomelec", "inicio": "07:00 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Conciliación Radian -Tarjetas de credito", "ent": "Auxiliar vs. Radian + Informe de cartera", "cierre": "01:00 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 80, "fecha": "2026-09-28", "dia": "lunes", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Revisar informes de recibos de caja y egresos- Curso de IA de 2-5 pm", "ent": "Informe diario revisado", "cierre": "16:30 revisar avances del equipo", "estado": "Completado"},
+    {"fila": 81, "fecha": "2026-09-28", "dia": "lunes", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Validación de documentos de clientes y proveedores + Actualizar estados de cuenta", "ent": "Expedientes completos + Estados de cuenta actualizados", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Completada"},
+    {"fila": 82, "fecha": "2026-09-28", "dia": "lunes", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Seguimiento de clientes +Facturas de venta", "ent": "Seguimiento de cartera", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 83, "fecha": "2026-09-28", "dia": "lunes", "resp": "Paula", "empresa": "Incomelec", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Comprobantes de egreso -recibos de caja", "ent": "Comprobantes de egreso -recibos de caja", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"},
+    {"fila": 84, "fecha": "2026-09-29", "dia": "martes", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Validar cuentas por pagar y por cobrar+Revision inventario", "ent": "Reporte validado", "cierre": "16:30 revisar avances del equipo", "estado": "Pendiente"},
+    {"fila": 85, "fecha": "2026-09-29", "dia": "martes", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Cruce de anticipos a proveedores", "ent": "Correo a Compras con auxiliar", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Pendiente"},
+    {"fila": 86, "fecha": "2026-09-29", "dia": "martes", "resp": "Leonardo", "empresa": "Incomelec -Suplec", "inicio": "07:30 revisar correo y priorizar solicitudes de cartera y facturacion", "act": "Certificados de retencion clientes", "ent": "Auxiliar vs certificados del bimestre, tabla consolidado año", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Pendiente"},
+    {"fila": 87, "fecha": "2026-09-29", "dia": "martes", "resp": "Paula", "empresa": "Incomelec", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Comprobantes de egreso -recibos de caja", "ent": "Control de pólizas actualizado", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Pendiente"},
+    {"fila": 88, "fecha": "2026-09-30", "dia": "miércoles", "resp": "Deisy", "empresa": "Incomelec - Suplec - Parqueoo", "inicio": "07:30 revisar correo, requerimientos, pagos y prioridades del equipo", "act": "Revisar clientes certificados de retenciones", "ent": "Seguimiento de cartera", "cierre": "16:30 revisar avances del equipo", "estado": "Pendiente"},
+    {"fila": 89, "fecha": "2026-09-30", "dia": "miércoles", "resp": "Jeymy", "empresa": "Incomelec - Suplec", "inicio": "07:30 revisar correo y priorizar facturas, proveedores y Cifrato", "act": "Facturas de compra del exterior", "ent": "Estado de cuenta vs. auxiliar", "cierre": "16:30 actualizar Cifrato, auxiliares y pendientes", "estado": "Pendiente"},
+    {"fila": 90, "fecha": "2026-09-30", "dia": "miércoles", "resp": "Paula", "empresa": "Parqueoo", "inicio": "07:30 revisar correo y priorizar solicitudes; validar novedades de pagos", "act": "Comprobantes de egreso -recibos de caja", "ent": "Documento costo de ventas", "cierre": "16:30 actualizar soportes y pendientes del día", "estado": "Completada"}
+  ]
+};
+</script>
+<style>
+:root{
+  --acc: oklch(0.47 0.12 150);  --acc-d: oklch(0.31 0.08 152); --acc-m: oklch(0.66 0.12 150); --acc-l: oklch(0.94 0.04 150);
+  --bad: oklch(0.52 0.18 27);   --bad-l: oklch(0.95 0.03 27);
+  --warn: oklch(0.50 0.11 70);  --warn-l: oklch(0.95 0.05 85);
+  --page:#F2F2F3; --shell:#FAFAFA; --card:#FFFFFF; --sub:#F5F5F6; --line:#E6E6E9;
+  --tx:#111214; --tx2:#4D5056; --tx3:#5E6168;
+  --stripe-a: var(--acc-l); --stripe-b: oklch(0.80 0.07 150);
+  --sh: 0 1px 2px rgb(0 0 0 / .04), 0 8px 24px rgb(0 0 0 / .045);
+  --sh-h: 0 2px 4px rgb(0 0 0 / .05), 0 16px 36px rgb(0 0 0 / .08);
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --r-card: 22px;
+  color-scheme: light;
+}
+:root[data-theme="dark"]{
+  --acc: oklch(0.72 0.14 150); --acc-d: oklch(0.34 0.08 152); --acc-m: oklch(0.60 0.12 150); --acc-l: oklch(0.30 0.05 150);
+  --bad: oklch(0.72 0.15 27); --bad-l: oklch(0.30 0.06 27);
+  --warn: oklch(0.80 0.12 80); --warn-l: oklch(0.32 0.05 80);
+  --page:#0E0F10; --shell:#141517; --card:#1B1C1F; --sub:#232529; --line:#2E3035;
+  --tx:#F3F3F4; --tx2:#BFC2C8; --tx3:#AEB1B8;
+  --stripe-a: oklch(0.30 0.05 150); --stripe-b: oklch(0.45 0.08 150);
+  --sh: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px rgb(0 0 0 / .25);
+  --sh-h: 0 2px 4px rgb(0 0 0 / .35), 0 16px 36px rgb(0 0 0 / .4);
+  color-scheme: dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:Inter,system-ui,sans-serif;background:var(--page);color:var(--tx);font-size:14px;line-height:1.45;min-height:100vh;transition:background .3s var(--ease),color .3s var(--ease)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,select{font:inherit;color:inherit}
+:focus-visible{outline:2.5px solid var(--acc);outline-offset:2px;border-radius:8px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.lucide{width:16px;height:16px;stroke-width:1.75;flex-shrink:0}
+.num{font-variant-numeric:tabular-nums}
+
+/* SHELL */
+/* ENCABEZADO */
+.hdr{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:space-between;gap:28px;min-height:124px;padding:24px 72px 24px 42px;color:#fff;z-index:30}
+.hdr::before,.hdr::after{content:"";position:absolute;inset:0;border-radius:28px;clip-path:polygon(0 0,calc(100% - 68px) 0,100% 68px,100% 100%,0 100%);pointer-events:none}
+.hdr::before{z-index:-2;background:radial-gradient(90% 160% at 100% 0%,rgb(255 255 255 / .2),transparent 34%),linear-gradient(100deg,#1D8A50 0%,#187E48 38%,#126A3C 68%,#0C5230 100%)}
+.hdr::after{z-index:-1;background-image:radial-gradient(rgb(255 255 255 / .18) 1px,transparent 1.5px);background-size:14px 14px;
+  -webkit-mask-image:linear-gradient(90deg,transparent 42%,#000 88%);mask-image:linear-gradient(90deg,transparent 42%,#000 88%)}
+/* Logo INCOMELEC: marco blanco + borde verde + texto en Poppins ExtraBold Itálica (vectorizado, no depende de fuentes externas) */
+.hdr-logo{background:#fff;border-radius:16px;padding:4px;display:flex;flex-shrink:0;box-shadow:0 8px 22px rgb(0 0 0 / .16)}
+.hdr-logo-in{display:flex;align-items:center;justify-content:center;height:66px;padding:0 30px;border:3.5px solid #0E6B3A;border-radius:12px;color:#0E6B3A}
+.hdr-logo-in svg{height:33px;width:auto;display:block}
+.hdr-tools{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex:1;min-width:0}
+.hpill{background:var(--card);color:var(--tx);border-radius:999px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 10px rgb(0 0 0 / .12)}
+.hpill.search{flex:0 1 640px;min-width:220px;height:62px;padding:0 14px 0 24px;position:relative}
+.hpill.search svg.lucide{width:19px;height:19px;color:var(--tx2)}
+.seg{display:flex;align-items:center;gap:6px;height:62px;padding:7px;border-radius:999px;background:var(--card);box-shadow:0 2px 10px rgb(0 0 0 / .12);flex-shrink:0}
+.seg button{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--tx);transition:background .2s,color .2s}
+.seg button:hover{background:var(--sub)}
+.seg button[aria-checked="true"]{background:#111214;color:#fff}
+:root[data-theme="dark"] .seg button[aria-checked="true"]{background:#F3F3F4;color:#111214}
+.seg svg.lucide{width:20px;height:20px}
+.hdr :focus-visible{outline-color:#fff}
+.hpill :focus-visible,.seg :focus-visible{outline-color:var(--acc)}
+.subnav{display:flex;align-items:center;justify-content:space-between;gap:14px 20px;flex-wrap:wrap;margin:18px 0 26px}
+.subnav-r{display:flex;align-items:center;gap:12px 14px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
+.caption{font-size:12.5px;font-weight:650;letter-spacing:.11em;text-transform:uppercase;color:var(--tx2)}
+.pick{position:relative;height:58px;padding:0 6px 0 6px}
+.pick .ctx-btn{min-height:46px;padding:4px 14px 4px 4px}
+.pick .ctx-btn .av,.pick .ctx-btn .mono{width:38px;height:38px}
+.mono svg.lucide{width:17px;height:17px}
+.pop.right{left:auto;right:0}
+
+.shell{max-width:1680px;margin:16px auto;background:var(--shell);border-radius:30px;padding:16px 24px 32px;min-height:calc(100vh - 32px)}
+.isl{background:var(--card);border-radius:999px;box-shadow:var(--sh);display:flex;align-items:center;gap:8px;padding:6px;min-height:48px}
+.tabs{position:relative}
+.tab{position:relative;z-index:1;display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:999px;font-weight:600;font-size:13px;color:var(--tx2);transition:color .25s var(--ease);min-height:36px}
+.tab[aria-selected="true"]{color:#fff}
+:root[data-theme="dark"] .tab[aria-selected="true"]{color:#0E0F10}
+.tab .cnt{font-size:11px;font-weight:700;background:var(--sub);color:var(--tx2);border-radius:999px;padding:1px 7px}
+.tab[aria-selected="true"] .cnt{background:rgb(255 255 255 / .2);color:inherit}
+.tab .cnt.alert{background:var(--bad-l);color:var(--bad)}
+.tab-ind{position:absolute;top:6px;bottom:6px;left:0;width:0;border-radius:999px;background:var(--tx);transition:transform .35s var(--ease),width .35s var(--ease)}
+.ctx{position:relative}
+.ctx-btn{display:flex;align-items:center;gap:10px;padding:4px 14px 4px 4px;border-radius:999px;min-height:36px;text-align:left}
+.ctx-btn:hover{background:var(--sub)}
+.mono{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;background:var(--acc-l);color:var(--acc-d);flex-shrink:0}
+:root[data-theme="dark"] .mono{color:var(--acc)}
+.ctx-btn b{font-size:13px;display:block;line-height:1.15}
+.ctx-btn small{font-size:11px;color:var(--tx3);display:block}
+.pop{position:absolute;top:calc(100% + 8px);left:0;max-height:min(70vh,520px);overflow:auto;background:var(--card);border-radius:18px;box-shadow:var(--sh-h);padding:8px;min-width:280px;z-index:40;display:none}
+.pop.on{display:block;animation:pop .2s var(--ease)}
+@keyframes pop{from{opacity:0;transform:translateY(-6px)}}
+.opt{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border-radius:12px;text-align:left}
+.opt:hover,.opt:focus-visible{background:var(--sub)}
+.opt[aria-selected="true"]{background:var(--acc-l)}
+.opt b{font-size:13px;display:block}.opt small{font-size:11.5px;color:var(--tx3)}
+.hpill.search input{border:0;background:transparent;outline:none;flex:1;min-width:0;font-size:15px;padding:6px 0}
+.hpill.search input::placeholder{color:var(--tx3)}
+.kbd{font-size:11px;border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--tx3)}
+.sres{position:absolute;left:0;right:0;top:calc(100% + 8px);background:var(--card);border-radius:18px;box-shadow:var(--sh-h);padding:8px;z-index:40;display:none;max-height:380px;overflow:auto}
+.sres.on{display:block}
+.sres .opt small{display:block}
+.pop h6,.sres h6{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);padding:6px 8px 2px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--acc);flex-shrink:0}
+.icon-btn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.icon-btn:hover{background:var(--sub)}
+
+/* HEAD */
+.vhead{display:flex;align-items:flex-end;justify-content:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.vhead h1{font-size:40px;font-weight:600;letter-spacing:-.025em;line-height:1.05}
+.vhead p{color:var(--tx2);margin-top:6px;font-size:14.5px}
+.btn{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:10px 18px;font-weight:600;font-size:13px;min-height:40px;transition:transform .2s var(--ease),background .2s}
+.btn.pri{background:var(--tx);color:var(--card)}
+.btn.pri:hover{transform:translateY(-1px)}
+.btn.acc{background:var(--acc);color:#fff}
+:root[data-theme="dark"] .btn.acc{color:#0E0F10}
+.btn.sec{background:var(--sub);color:var(--tx)}
+.btn.sec:hover{background:var(--line)}
+.btn.sm{padding:6px 12px;min-height:32px;font-size:12px}
+
+/* GRID / CARDS */
+.bento{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+.card{background:var(--card);border-radius:var(--r-card);box-shadow:var(--sh);padding:24px;position:relative;transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
+.card.hov:hover{transform:translateY(-3px);box-shadow:var(--sh-h)}
+.enter{animation:enter .38s var(--ease) both;animation-delay:calc(var(--i,0) * 50ms)}
+@keyframes enter{from{opacity:0;transform:translateY(10px)}}
+.c3{grid-column:span 3}.c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:span 12}
+.ch{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+.ch h3{font-size:15px;font-weight:650;letter-spacing:-.01em;line-height:1.3}
+.ch .lbl{font-size:11.5px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.go{width:34px;height:34px;border-radius:50%;background:var(--sub);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s,transform .2s var(--ease)}
+.go:hover{background:var(--acc);color:#fff;transform:rotate(-8deg)}
+.subc{background:var(--sub);border-radius:16px;padding:14px}
+
+/* KPI */
+.kpi{cursor:pointer;display:flex;flex-direction:column;gap:0;text-align:left;container-type:inline-size;min-height:0}
+.kpi .kh{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.kpi .k{font-size:14px;font-weight:650}
+.kpi .ico{width:38px;height:38px;border-radius:12px;background:var(--sub);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.kpi .ico svg.lucide{width:18px;height:18px}
+.kpi .v{font-size:clamp(34px,17cqi,60px);font-weight:750;letter-spacing:-.03em;line-height:1}
+.kpi .v small{font-size:.42em;font-weight:600;letter-spacing:0;color:var(--tx3);margin-left:4px}
+.kpi .s{font-size:clamp(12.5px,4.6cqi,14px);color:var(--tx2);margin-top:8px}
+.kpi .kf{margin-top:auto;padding-top:16px}
+.kpi .kf .bar{height:10px}
+.kf-row{display:flex;justify-content:space-between;font-size:12px;color:var(--tx3);margin-top:7px;gap:8px}
+.kf-row b{color:var(--tx);font-weight:650}
+.wspark{display:flex;align-items:flex-end;gap:6px;height:38px}
+.wspark span{flex:1;border-radius:6px 6px 3px 3px;background:var(--acc-l);position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
+.wspark span i{display:block;background:var(--acc);border-radius:inherit}
+.kpi.hero{background:linear-gradient(135deg,#0E7A40 0%,#0A5A30 100%);color:#fff;overflow:hidden;isolation:isolate}
+.kpi.hero::before{content:"";position:absolute;right:-60px;top:-80px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgb(255 255 255 / .16),rgb(255 255 255 / 0) 70%);z-index:-1}
+.kpi.hero .ico{background:rgb(255 255 255 / .16)}
+.kpi.hero .s,.kpi.hero .kf-row{color:rgb(255 255 255 / .88)}
+.kpi.hero .kf-row b{color:#fff}
+.kpi.hero .bar{background:rgb(255 255 255 / .2)}
+.kpi.hero .bar .c{background:#fff}
+.kpi.hero .v small{color:rgb(255 255 255 / .8)}
+:root[data-theme="dark"] .kpi.hero{background:linear-gradient(135deg,#0B6435 0%,#083F23 100%)}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:650;white-space:nowrap}
+.pill svg.lucide{width:13px;height:13px}
+.pill.ok{background:var(--acc-l);color:var(--acc-d)}
+:root[data-theme="dark"] .pill.ok{color:var(--acc)}
+.pill.bad{background:var(--bad-l);color:var(--bad)}
+.pill.warn{background:var(--warn-l);color:var(--warn)}
+.pill.neu{background:var(--sub);color:var(--tx2)}
+.pill.on-hero{background:rgb(255 255 255 / .18);color:#fff}
+
+/* STRIPES */
+.striped{background:repeating-linear-gradient(45deg,var(--stripe-a) 0 4px,var(--stripe-b) 4px 8px)}
+
+/* GAUGE */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.gauge-wrap svg{width:100%;max-width:300px;height:auto;overflow:visible}
+.gauge-c{margin-top:-62px;text-align:center}
+.gauge-c b{font-size:38px;font-weight:700;letter-spacing:-.02em;display:block;line-height:1}
+.gauge-c>span{font-size:12px;color:var(--tx3)}
+.gchips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px}
+.gchip{border-radius:14px;padding:10px 8px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.gchip b{font-size:clamp(18px,2vw,24px);font-weight:750;line-height:1.1}
+.gchip span{font-size:11.5px;font-weight:600}
+.gchip.ok{background:var(--acc-l);color:var(--acc-d)}
+:root[data-theme="dark"] .gchip.ok{color:var(--acc)}
+.gchip.warn{background:var(--warn-l);color:var(--warn)}
+.gchip.bad{background:var(--bad-l);color:var(--bad)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--tx2);margin-top:14px;justify-content:center}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:6px;vertical-align:-2px}
+
+/* LINE CHART */
+.chart{position:relative}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.tip{position:absolute;pointer-events:none;background:var(--tx);color:var(--card);border-radius:12px;padding:8px 11px;font-size:12px;line-height:1.35;white-space:nowrap;transform:translate(-50%,-110%);opacity:0;transition:opacity .15s}
+.tip.on{opacity:1}
+.tip b{font-size:12.5px}
+
+/* WEEK COLUMNS */
+.cols{display:flex;align-items:flex-end;justify-content:space-around;gap:10px;height:200px;padding-top:30px}
+.col{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;height:100%;justify-content:flex-end;position:relative}
+.col-bar{width:min(46px,100%);border-radius:999px;overflow:hidden;display:flex;flex-direction:column;background:var(--sub);transition:height .5s var(--ease),transform .2s var(--ease)}
+.col-bar .p{flex:0 0 auto}
+.col-bar .c{background:var(--acc);flex:1 1 auto}
+.col:hover .col-bar,.col:focus-visible .col-bar,.col.is-sel .col-bar{transform:scaleX(1.08)}
+.col .tag{position:absolute;top:-4px;font-size:11.5px;font-weight:700;background:var(--tx);color:var(--card);padding:3px 8px;border-radius:999px;opacity:0;transform:translateY(4px);transition:.2s var(--ease);white-space:nowrap}
+.col:hover .tag,.col:focus-visible .tag,.col.is-sel .tag{opacity:1;transform:none}
+.col small{font-size:11.5px;color:var(--tx2);font-weight:600;text-align:center;line-height:1.2}
+.col small span{display:block;font-weight:400;color:var(--tx3);font-size:11px}
+
+/* ROWS */
+.row{display:flex;align-items:center;gap:12px;padding:10px;border-radius:14px;width:100%;text-align:left;transition:background .2s}
+.row:hover,.row.is-sel{background:var(--sub)}
+.row .meta{flex:1;min-width:0}
+.row .meta b{font-size:13px;display:block}
+.row .meta small{font-size:12px;color:var(--tx3);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .chev{color:var(--tx3)}
+.av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:inset 0 0 0 1px rgb(0 0 0 / .04)}
+.av svg{width:100%;height:100%;display:block}
+.bar{height:8px;border-radius:999px;background:var(--sub);overflow:hidden;display:flex}
+.bar .c{background:var(--acc);border-radius:999px}
+.bar .p{border-radius:0 999px 999px 0}
+.frac{font-size:12px;font-weight:650;min-width:44px;text-align:right}
+
+/* ALERTS */
+.alert-hero{background:var(--bad-l);border-radius:18px;padding:16px;margin-bottom:10px;display:block;width:100%;text-align:left;transition:transform .2s var(--ease)}
+.alert-hero:hover{transform:translateY(-2px)}
+.alert-hero .big{font-size:28px;font-weight:700;color:var(--bad);line-height:1}
+.alert-hero p{font-size:13px;margin-top:6px}
+.alert-hero small{color:var(--tx2);font-size:12px}
+
+/* INSIGHTS */
+.ins{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:14px;text-align:left;width:100%;transition:background .2s}
+.ins:hover{background:var(--sub)}
+.ins .n{width:28px;height:28px;border-radius:9px;background:var(--acc-l);color:var(--acc-d);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+:root[data-theme="dark"] .ins .n{color:var(--acc)}
+.ins p{font-size:13.5px;line-height:1.4}
+.ins small{display:block;font-size:11.5px;color:var(--tx3);margin-top:3px}
+
+/* PEOPLE */
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:600;background:var(--card);box-shadow:var(--sh);min-height:34px;transition:background .2s,color .2s}
+.chip[aria-pressed="true"]{background:var(--tx);color:var(--card)}
+.chip .cnt{font-size:11px;opacity:.75}
+.people{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.pcard{display:flex;flex-direction:column;gap:14px;cursor:pointer}
+.pcard.is-sel{box-shadow:0 0 0 2px var(--acc),var(--sh-h)}
+.pcard .top-row{display:flex;gap:12px;align-items:center}
+.pcard .av{width:48px;height:48px;font-size:15px}
+.pcard h4{font-size:16px;font-weight:650}
+.pcard .rol{font-size:12px;color:var(--tx3)}
+.pm{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pm .subc b{font-size:22px;font-weight:700;display:block;line-height:1.1}
+.pm .subc span{font-size:11.5px;color:var(--tx3)}
+.pact{display:flex;gap:8px;flex-wrap:wrap}
+
+/* MATRIX */
+.mx-wrap{overflow-x:auto;margin:0 -6px;padding:0 6px 4px}
+.mx{border-collapse:separate;border-spacing:4px;width:100%;min-width:760px}
+.mx th{font-size:11px;font-weight:600;color:var(--tx3);text-align:center;padding:2px;line-height:1.2}
+.mx th.wk{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);border-bottom:2px solid var(--line);padding-bottom:4px}
+.mx td.nm{text-align:left;white-space:nowrap;padding-right:6px}
+.mx td.nm .row{padding:4px 6px}
+.mx td.nm .av{width:28px;height:28px;font-size:10.5px}
+.cell{width:100%;min-width:26px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:transform .15s var(--ease),box-shadow .15s}
+.cell svg.lucide{width:15px;height:15px}
+.cell:hover,.cell:focus-visible{transform:scale(1.1)}
+.cell.ok{background:var(--acc);color:#fff}
+:root[data-theme="dark"] .cell.ok{color:#0E0F10}
+.cell.pe{color:var(--bad);box-shadow:inset 0 0 0 2px var(--bad)}
+.cell.pe{background:repeating-linear-gradient(45deg,var(--bad-l) 0 4px,transparent 4px 8px)}
+.cell.no{background:var(--sub);color:var(--tx3);cursor:help}
+.cell.dim{opacity:.22}
+.cell.is-sel{box-shadow:0 0 0 2.5px var(--tx)}
+.mx tr.is-sel td.nm .row{background:var(--sub)}
+
+/* THEMES */
+.thgrid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(var(--rows),auto);grid-auto-flow:column;gap:2px 24px}
+.hbar{display:grid;grid-template-columns:170px 1fr 70px;align-items:center;gap:12px;width:100%;padding:6px 8px;border-radius:12px;text-align:left}
+.hbar:hover,.hbar:focus-visible{background:var(--sub)}
+.hbar .t{font-size:13px;font-weight:550}
+.hbar .track{height:14px;border-radius:999px;background:var(--sub);display:flex;overflow:hidden}
+.hbar:hover .track{background:var(--card)}
+.hbar .track .c{background:var(--acc);border-radius:999px 0 0 999px}
+.hbar .track .c:last-child{border-radius:999px}
+.hbar .v{font-size:12.5px;font-weight:650;text-align:right}
+
+/* TABLE */
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.field{display:flex;align-items:center;gap:8px;background:var(--sub);border-radius:999px;padding:4px 14px;min-height:38px}
+.field input,.field select{border:0;background:transparent;outline:none;font-size:13px;min-width:0}
+.field select{cursor:pointer;padding:4px 0}
+.field select option{background:var(--card);color:var(--tx)}
+.tbl-wrap{overflow-x:auto}
+table.dt{width:100%;border-collapse:collapse;font-size:13px}
+.dt th{text-align:left;font-size:11.5px;font-weight:650;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;padding:10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.dt th button{display:inline-flex;align-items:center;gap:4px;font:inherit;color:inherit;text-transform:inherit;letter-spacing:inherit;min-height:24px}
+.dt th button svg.lucide{width:13px;height:13px}
+.dt td{padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.dt tbody tr{cursor:pointer;transition:background .15s}
+.dt tbody tr:hover{background:var(--sub)}
+.dt tbody tr.is-sel{background:var(--acc-l)}
+.dt .id{font-weight:700;white-space:nowrap}
+.dt .id small{display:block;font-weight:400;color:var(--tx3);font-size:11.5px}
+.dt .act{min-width:240px;max-width:380px}
+.dt .ent{color:var(--tx2);min-width:180px;max-width:260px}
+.who{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.who .av{width:26px;height:26px;font-size:10px}
+.ep{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--sub);color:var(--tx2);margin:1px 3px 1px 0;white-space:nowrap}
+.tcount{font-size:12.5px;color:var(--tx2);margin-left:auto}
+.empty{text-align:center;color:var(--tx3);padding:28px;font-size:13px}
+details.dq summary{cursor:pointer;font-weight:650;font-size:14px;list-style:none;display:flex;align-items:center;gap:8px;min-height:28px}
+details.dq summary::-webkit-details-marker{display:none}
+details.dq ul{margin:12px 0 0 0;padding-left:20px;font-size:13px;color:var(--tx2);display:grid;gap:6px}
+
+/* INSPECTOR */
+.insp-bg{position:fixed;inset:0;background:rgb(10 10 12 / .28);opacity:0;pointer-events:none;transition:opacity .3s var(--ease);z-index:60}
+.insp-bg.on{opacity:1;pointer-events:auto}
+.insp{position:fixed;top:12px;right:12px;bottom:12px;width:min(560px,calc(100vw - 24px));background:var(--card);border-radius:26px;box-shadow:0 24px 60px rgb(0 0 0 / .22);z-index:61;transform:translateX(calc(100% + 24px));transition:transform .38s var(--ease);display:flex;flex-direction:column;overflow:hidden}
+.insp.on{transform:none}
+.insp-h{padding:22px 24px 14px;display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line)}
+.insp-h .ty{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--tx3)}
+.insp-h h2{font-size:20px;font-weight:650;letter-spacing:-.015em;line-height:1.25;margin-top:4px}
+.insp-h p{font-size:13px;color:var(--tx2);margin-top:4px}
+.insp-b{padding:18px 24px 28px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:16px}
+.mk{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mk .subc b{font-size:20px;font-weight:700;display:block}
+.mk .subc span{font-size:11.5px;color:var(--tx3)}
+dl.kv{display:grid;grid-template-columns:130px 1fr;gap:10px 14px;font-size:13.5px}
+dl.kv dt{font-size:11.5px;font-weight:650;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;padding-top:2px}
+.note{font-size:12.5px;color:var(--tx2);background:var(--warn-l);border-radius:12px;padding:10px 12px;display:flex;gap:8px}
+.note svg.lucide{color:var(--warn);margin-top:1px}
+.insp .dt td{padding:10px 8px}
+
+/* TOAST */
+.toasts{position:fixed;left:20px;bottom:20px;display:flex;flex-direction:column;gap:8px;z-index:80}
+.toast{background:#111214;color:#F3F3F4;border-radius:999px;padding:10px 12px 10px 16px;display:flex;align-items:center;gap:10px;font-size:13px;box-shadow:0 12px 30px rgb(0 0 0 / .25);animation:pop .25s var(--ease)}
+.toast .dot{background:oklch(0.72 0.14 150)}
+.toast button{color:oklch(0.80 0.12 150);font-weight:700;padding:4px 8px;border-radius:999px}
+.toast button:hover{background:rgb(255 255 255 / .1)}
+
+.foot{text-align:center;font-size:12px;color:var(--tx3);margin-top:28px}
+.local{font-size:11px;font-weight:650;color:var(--warn);background:var(--warn-l);border-radius:999px;padding:2px 8px;margin-left:6px;white-space:nowrap}
+
+::view-transition-old(root),::view-transition-new(root){animation-duration:.25s}
+
+/* RESPONSIVE */
+@media (max-width:1180px){ .subnav-r{width:100%;justify-content:flex-start} .caption{flex-basis:100%} }
+@media (max-width:900px){
+  .hdr{flex-wrap:wrap;padding:20px 28px 20px 24px;gap:18px;min-height:0}
+  .hdr::before,.hdr::after{border-radius:22px;clip-path:polygon(0 0,calc(100% - 40px) 0,100% 40px,100% 100%,0 100%)}
+  .hdr-tools{flex:1 1 100%}
+  .hpill.search{flex:1 1 auto;height:54px}
+  .seg{height:54px;padding:5px}.seg button{width:44px;height:44px}
+  .hdr-logo-in{height:56px;padding:0 24px}.hdr-logo-in svg{height:27px}
+}
+@media (max-width:620px){
+  .hdr{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"logo seg" "search search";padding:18px 34px 16px 18px;gap:16px}
+  .hdr::before,.hdr::after{clip-path:polygon(0 0,calc(100% - 26px) 0,100% 26px,100% 100%,0 100%)}
+  .caption{font-size:11.5px;letter-spacing:.06em}
+  .hdr-tools{display:contents}
+  .hdr-logo{grid-area:logo;justify-self:start}
+  .hdr-logo{padding:3px;border-radius:13px}.hdr-logo-in{height:42px;padding:0 12px;border-width:2.5px;border-radius:10px}.hdr-logo-in svg{height:18px}
+  .seg{grid-area:seg;height:44px;padding:4px;gap:1px;align-self:center}.seg button{width:36px;height:36px}.seg svg.lucide{width:18px;height:18px}
+  .hpill.search{grid-area:search;min-width:0;height:50px;padding-left:16px}
+  .subnav-r .pick{flex:1 1 100%}
+  .pick .ctx-btn{width:100%}
+  .pick .ctx-btn>svg:last-child{margin-left:auto}
+}
+@media (max-width:1180px){
+  .c3{grid-column:span 6}.c4{grid-column:span 6}.c5,.c7{grid-column:span 12}.c8{grid-column:span 12}
+  .people{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:768px){
+  .shell{margin:0;border-radius:0;padding:12px 16px 28px}
+  .top{gap:8px}
+  .isl.tabs-isl{width:100%}
+  .tabs-isl .tab{flex:1;justify-content:center;padding:9px 8px}
+  .vhead h1{font-size:30px}
+  .bento{gap:14px}
+  .c3,.c4,.c6{grid-column:span 12}
+  .kpi{min-height:0}
+  .kpi.c3{grid-column:span 6;padding:16px}
+  .kpi .kh{margin-bottom:10px}
+  .people{grid-template-columns:1fr}
+  .card{padding:18px}
+  .hbar{grid-template-columns:110px 1fr 74px}
+  .thgrid{grid-template-columns:1fr;grid-auto-flow:row}
+  dl.kv{grid-template-columns:1fr;gap:2px 0}
+  dl.kv dd{margin-bottom:8px}
+  .mk{grid-template-columns:repeat(3,1fr)}
+  .toasts{left:12px;right:12px}
+}
+@media (max-width:480px){ .tabs-isl .tab svg.lucide{display:none} .tabs-isl .tab{gap:5px;font-size:12.5px} .kpi.hero.c3{grid-column:span 12} .brand-logo{height:44px;padding:6px 10px} .brand-logo img{height:26px} .hdr-tt b{font-size:16px} }
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <pattern id="stripes" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+      <rect width="8" height="8" style="fill:var(--stripe-a)"/><rect width="4" height="8" style="fill:var(--stripe-b)"/>
+    </pattern>
+    <linearGradient id="areaG" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" style="stop-color:var(--acc);stop-opacity:.22"/><stop offset="1" style="stop-color:var(--acc);stop-opacity:0"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="shell">
+  <header class="hdr">
+    <div class="hdr-logo"><span class="hdr-logo-in"><svg viewBox="5 -716 5805 723" role="img" aria-label="INCOMELEC"><path d="M326 -705 202 0H5L130 -705ZM957 0H760L570 -394L500 0H303L428 -705H624L815 -306L885 -705H1081ZM1511 -712Q1598 -712 1663.0 -680.0Q1728 -648 1764.0 -589.0Q1800 -530 1803 -450H1592Q1580 -489 1550.0 -510.0Q1520 -531 1476 -531Q1408 -531 1359.0 -483.0Q1310 -435 1296 -354Q1292 -333 1292 -309Q1292 -247 1324.5 -211.5Q1357 -176 1414 -176Q1458 -176 1495.5 -197.0Q1533 -218 1558 -257H1770Q1722 -136 1619.0 -65.5Q1516 5 1384 5Q1293 5 1226.5 -30.0Q1160 -65 1125.0 -129.0Q1090 -193 1090 -277Q1090 -316 1097 -354Q1115 -458 1173.0 -539.5Q1231 -621 1319.0 -666.5Q1407 -712 1511 -712ZM1848 -288Q1848 -413 1900.5 -510.5Q1953 -608 2047.5 -662.0Q2142 -716 2264 -716Q2355 -716 2423.5 -679.5Q2492 -643 2529.0 -576.5Q2566 -510 2566 -423Q2566 -299 2513.0 -201.0Q2460 -103 2365.0 -48.0Q2270 7 2147 7Q2058 7 1990.0 -30.0Q1922 -67 1885.0 -134.0Q1848 -201 1848 -288ZM2372 -400Q2372 -464 2337.5 -499.5Q2303 -535 2239 -535Q2180 -535 2135.0 -504.5Q2090 -474 2066.0 -423.0Q2042 -372 2042 -311Q2042 -248 2077.0 -211.5Q2112 -175 2177 -175Q2236 -175 2280.5 -206.0Q2325 -237 2348.5 -288.5Q2372 -340 2372 -400ZM3531 -705 3406 0H3211L3280 -390L3077 0H2913L2849 -392L2780 0H2583L2708 -705H2945L3042 -248L3295 -705ZM3802 -550 3782 -433H4007L3980 -284H3755L3732 -156H3987L3960 0H3508L3633 -705H4084L4057 -550ZM4270 -149H4489L4462 0H4046L4171 -705H4367ZM4821 -550 4801 -433H5026L4999 -284H4774L4751 -156H5006L4979 0H4527L4652 -705H5103L5076 -550ZM5518 -712Q5605 -712 5670.0 -680.0Q5735 -648 5771.0 -589.0Q5807 -530 5810 -450H5599Q5587 -489 5557.0 -510.0Q5527 -531 5483 -531Q5415 -531 5366.0 -483.0Q5317 -435 5303 -354Q5299 -333 5299 -309Q5299 -247 5331.5 -211.5Q5364 -176 5421 -176Q5465 -176 5502.5 -197.0Q5540 -218 5565 -257H5777Q5729 -136 5626.0 -65.5Q5523 5 5391 5Q5300 5 5233.5 -30.0Q5167 -65 5132.0 -129.0Q5097 -193 5097 -277Q5097 -316 5104 -354Q5122 -458 5180.0 -539.5Q5238 -621 5326.0 -666.5Q5414 -712 5518 -712Z" fill="currentColor"/></svg></span></div>
+    <div class="hdr-tools">
+      <div class="hpill search" role="search">
+        <i data-lucide="search"></i>
+        <label for="q" class="sr">Buscar en el panel</label>
+        <input id="q" type="search" placeholder="Buscar tarea, empresa, persona…" autocomplete="off" aria-controls="sres" aria-expanded="false">
+        <span class="kbd" aria-hidden="true">/</span>
+        <div class="sres" id="sres" role="listbox" aria-label="Resultados"></div>
+      </div>
+      <div class="seg" role="radiogroup" aria-label="Apariencia" id="themeSeg">
+        <button role="radio" data-th="system" aria-label="Según el sistema" title="Según el sistema"><i data-lucide="monitor"></i></button>
+        <button role="radio" data-th="light" aria-label="Modo claro" title="Modo claro"><i data-lucide="sun"></i></button>
+        <button role="radio" data-th="dark" aria-label="Modo oscuro" title="Modo oscuro"><i data-lucide="moon"></i></button>
+      </div>
+    </div>
+  </header>
+  <div class="subnav">
+    <nav class="isl tabs tabs-isl" role="tablist" aria-label="Vistas" id="tabs">
+      <span class="tab-ind" id="tabInd" aria-hidden="true"></span>
+    </nav>
+    <div class="subnav-r">
+      <span class="caption" id="caption"></span>
+      <div class="hpill pick" id="mes">
+        <button class="ctx-btn" id="mesBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="mesPop"></button>
+        <div class="pop right" id="mesPop" role="listbox" aria-label="Mes"></div>
+      </div>
+      <div class="hpill pick" id="ctx">
+        <button class="ctx-btn" id="ctxBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="ctxPop"></button>
+        <div class="pop right" id="ctxPop" role="listbox" aria-label="Equipo y empresa"></div>
+      </div>
+    </div>
+  </div>
+
+  <main id="view" tabindex="-1"></main>
+  <p class="foot" id="foot"></p>
+</div>
+
+<div class="insp-bg" id="inspBg"></div>
+<aside class="insp" id="insp" role="dialog" aria-modal="true" aria-labelledby="inspTitle" aria-hidden="true">
+  <div class="insp-h">
+    <div><div class="ty" id="inspType"></div><h2 id="inspTitle"></h2><p id="inspSub"></p></div>
+    <button class="icon-btn" id="inspClose" aria-label="Cerrar detalle"><i data-lucide="x"></i></button>
+  </div>
+  <div class="insp-b" id="inspBody"></div>
+</aside>
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+
+<script>
+/* ═══════════════ UTILIDADES ═══════════════ */
+const $=s=>document.querySelector(s);
+const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const d0=iso=>new Date(iso+'T00:00:00');
+const fD=iso=>{const d=d0(iso);return `${d.getDate()} ${MES[d.getMonth()]} ${d.getFullYear()}`};
+const fDs=iso=>{const d=d0(iso);return `${d.getDate()} ${MES[d.getMonth()]}`};
+const nf=(n,dec=0)=>Number(n).toLocaleString('es-CO',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+const pct=(a,b)=>b?a/b*100:0;
+const cap=s=>s?s[0].toUpperCase()+s.slice(1):s;
+/* Íconos Lucide 0.460 embebidos (sin CDN: se ven aunque internet o el firewall bloqueen recursos externos) */
+const ICONS={"monitor":"<rect width=\"20\" height=\"14\" x=\"2\" y=\"3\" rx=\"2\"/><line x1=\"8\" x2=\"16\" y1=\"21\" y2=\"21\"/><line x1=\"12\" x2=\"12\" y1=\"17\" y2=\"21\"/>","building":"<path d=\"M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z\"/><path d=\"M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2\"/><path d=\"M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2\"/><path d=\"M10 6h4\"/><path d=\"M10 10h4\"/><path d=\"M10 14h4\"/><path d=\"M10 18h4\"/>","arrow-down":"<path d=\"M12 5v14\"/><path d=\"m19 12-7 7-7-7\"/>","arrow-up":"<path d=\"m5 12 7-7 7 7\"/><path d=\"M12 19V5\"/>","arrow-up-down":"<path d=\"m21 16-4 4-4-4\"/><path d=\"M17 20V4\"/><path d=\"m3 8 4-4 4 4\"/><path d=\"M7 4v16\"/>","arrow-up-right":"<path d=\"M7 7h10v10\"/><path d=\"M7 17 17 7\"/>","bell-ring":"<path d=\"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9\"/><path d=\"M10.3 21a1.94 1.94 0 0 0 3.4 0\"/><path d=\"M4 2C2.8 3.7 2 5.7 2 8\"/><path d=\"M22 8c0-2.3-.8-4.3-2-6\"/>","calendar":"<path d=\"M8 2v4\"/><path d=\"M16 2v4\"/><rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"/><path d=\"M3 10h18\"/>","calendar-check":"<path d=\"M8 2v4\"/><path d=\"M16 2v4\"/><rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"/><path d=\"M3 10h18\"/><path d=\"m9 16 2 2 4-4\"/>","calendar-days":"<path d=\"M8 2v4\"/><path d=\"M16 2v4\"/><rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"/><path d=\"M3 10h18\"/><path d=\"M8 14h.01\"/><path d=\"M12 14h.01\"/><path d=\"M16 14h.01\"/><path d=\"M8 18h.01\"/><path d=\"M12 18h.01\"/><path d=\"M16 18h.01\"/>","chart-column":"<path d=\"M3 3v16a2 2 0 0 0 2 2h16\"/><path d=\"M18 17V9\"/><path d=\"M13 17V5\"/><path d=\"M8 17v-3\"/>","check":"<path d=\"M20 6 9 17l-5-5\"/>","chevron-down":"<path d=\"m6 9 6 6 6-6\"/>","chevron-right":"<path d=\"m9 18 6-6-6-6\"/>","circle-alert":"<circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"12\" x2=\"12\" y1=\"8\" y2=\"12\"/><line x1=\"12\" x2=\"12.01\" y1=\"16\" y2=\"16\"/>","circle-check":"<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m9 12 2 2 4-4\"/>","clock":"<circle cx=\"12\" cy=\"12\" r=\"10\"/><polyline points=\"12 6 12 12 16 14\"/>","download":"<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><polyline points=\"7 10 12 15 17 10\"/><line x1=\"12\" x2=\"12\" y1=\"15\" y2=\"3\"/>","gauge":"<path d=\"m12 14 4-4\"/><path d=\"M3.34 19a10 10 0 1 1 17.32 0\"/>","layers":"<path d=\"m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z\"/><path d=\"m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65\"/><path d=\"m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65\"/>","layout-dashboard":"<rect width=\"7\" height=\"9\" x=\"3\" y=\"3\" rx=\"1\"/><rect width=\"7\" height=\"5\" x=\"14\" y=\"3\" rx=\"1\"/><rect width=\"7\" height=\"9\" x=\"14\" y=\"12\" rx=\"1\"/><rect width=\"7\" height=\"5\" x=\"3\" y=\"16\" rx=\"1\"/>","list":"<path d=\"M3 12h.01\"/><path d=\"M3 18h.01\"/><path d=\"M3 6h.01\"/><path d=\"M8 12h13\"/><path d=\"M8 18h13\"/><path d=\"M8 6h13\"/>","list-checks":"<path d=\"m3 17 2 2 4-4\"/><path d=\"m3 7 2 2 4-4\"/><path d=\"M13 6h8\"/><path d=\"M13 12h8\"/><path d=\"M13 18h8\"/>","list-todo":"<rect x=\"3\" y=\"5\" width=\"6\" height=\"6\" rx=\"1\"/><path d=\"m3 17 2 2 4-4\"/><path d=\"M13 6h8\"/><path d=\"M13 12h8\"/><path d=\"M13 18h8\"/>","moon":"<path d=\"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z\"/>","panel-right-open":"<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\"/><path d=\"M15 3v18\"/><path d=\"m10 15-3-3 3-3\"/>","party-popper":"<path d=\"M5.8 11.3 2 22l10.7-3.79\"/><path d=\"M4 3h.01\"/><path d=\"M22 8h.01\"/><path d=\"M15 2h.01\"/><path d=\"M22 20h.01\"/><path d=\"m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10\"/><path d=\"m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17\"/><path d=\"m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7\"/><path d=\"M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z\"/>","rotate-ccw":"<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\"/><path d=\"M3 3v5h5\"/>","search":"<circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/>","sparkles":"<path d=\"M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z\"/><path d=\"M20 3v4\"/><path d=\"M22 5h-4\"/><path d=\"M4 17v2\"/><path d=\"M5 18H3\"/>","sun":"<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2\"/><path d=\"M12 20v2\"/><path d=\"m4.93 4.93 1.41 1.41\"/><path d=\"m17.66 17.66 1.41 1.41\"/><path d=\"M2 12h2\"/><path d=\"M20 12h2\"/><path d=\"m6.34 17.66-1.41 1.41\"/><path d=\"m19.07 4.93-1.41 1.41\"/>","table":"<path d=\"M12 3v18\"/><rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\"/><path d=\"M3 9h18\"/><path d=\"M3 15h18\"/>","target":"<circle cx=\"12\" cy=\"12\" r=\"10\"/><circle cx=\"12\" cy=\"12\" r=\"6\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/>","trending-up":"<polyline points=\"22 7 13.5 15.5 8.5 10.5 2 17\"/><polyline points=\"16 7 22 7 22 13\"/>","triangle-alert":"<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/>","user":"<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/>","users":"<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M22 21v-2a4 4 0 0 0-3-3.87\"/><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"/>","x":"<path d=\"M18 6 6 18\"/><path d=\"m6 6 12 12\"/>"};
+const ic=n=>`<svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICONS[n]||''}</svg>`;
+const LS='inc-conta-2026-09:';
+const store={get(k,d){try{const v=localStorage.getItem(LS+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(LS+k,JSON.stringify(v))}catch(e){}}};
+
+/* ═══════════════ MODELO DERIVADO ═══════════════ */
+const TODAY=(()=>{const d=new Date();d.setHours(0,0,0,0);return d})();
+const TODAY_ISO=`${TODAY.getFullYear()}-${String(TODAY.getMonth()+1).padStart(2,'0')}-${String(TODAY.getDate()).padStart(2,'0')}`;
+const THEMES=[
+  {k:'egresos',  l:'Egresos y caja',            re:/egreso|recibos? de caja|caja menor|tarjetas? de cr|trajetas/i},
+  {k:'venta',    l:'Facturación de venta',      re:/factura(s|ción)? de venta|informe de facturaci/i},
+  {k:'cartera',  l:'Cartera y clientes',        re:/cartera|clientes|morosos|cuentas por (pagar|cobrar)|pagos en exceso|solicitudes de pago/i},
+  {k:'compras',  l:'Compras y Cifrato',         re:/factura(s)? de compra|cifrato|exterior|proveedores/i},
+  {k:'impuestos',l:'Impuestos y retenciones',   re:/impuesto|\biva\b|retenci|\bica\b|f2x/i},
+  {k:'revision', l:'Revisión y control',        re:/revisar|revisi[oó]n|muestras?|validar|control|soportes|balances|revisor/i},
+  {k:'concil',   l:'Conciliaciones y cruces',   re:/conciliaci|radian|cruce/i},
+  {k:'costos',   l:'Centros de costo',          re:/centros de costo/i},
+  {k:'inventario',l:'Inventario',               re:/inventario/i},
+  {k:'viajes',   l:'Viáticos y gastos de viaje',re:/vi[aá]ticos|gastos de viaje/i},
+  {k:'estados',  l:'Estados de cuenta',         re:/estados de cuenta/i},
+  {k:'polizas',  l:'Pólizas',                   re:/p[oó]lizas?/i},
+  {k:'formacion',l:'Formación (curso de IA)',   re:/curso|capacitaci/i},
+  {k:'maestros', l:'Maestros y expedientes',    re:/creaci[oó]n de clientes|validaci[oó]n de documentos|cronograma|requerimientos|consecutivos|pendientes y riesgos/i}
+];
+const T=DATA.tareas.map((r,i)=>{
+  const emps=r.empresa.split('-').map(s=>s.trim()).filter(Boolean);
+  const est=/^complet/i.test(r.estado)?'Completada':'Pendiente';
+  const flags=[];
+  if(r.estado!==est) flags.push(`Estado escrito «${r.estado}» en el Excel; se lee como «${est}».`);
+  if(!r.ent) flags.push('Sin entregable registrado en el Excel.');
+  if(/^01:00/.test(r.cierre)) flags.push('La rutina de cierre dice «01:00»; probablemente es 1:00 p. m. (13:00). Se muestra como está en la fuente.');
+  return {...r,i,id:'F'+r.fila,emps,estadoFuente:est,mes:r.fecha.slice(0,7),semana:0,
+    temas:THEMES.filter(t=>t.re.test(r.act)).map(t=>t.k),flags};
+});
+const PEOPLE=Object.keys(DATA.personas);
+const EMPRESAS=Object.keys(DATA.empresas);
+/* Meses y semanas salen de las fechas del Excel: no hay meses escritos a mano */
+const MESES_ES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const mesLabel=m=>`${MESES_ES[+m.slice(5,7)-1]} ${m.slice(0,4)}`;
+const isoOf=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const lunesDe=iso=>{const d=d0(iso);d.setDate(d.getDate()-((d.getDay()+6)%7));return isoOf(d)};
+const MESES=[...new Set(T.map(t=>t.mes))].sort();
+const FBM={},WBM={};
+MESES.forEach(m=>{
+  const fs=[...new Set(T.filter(t=>t.mes===m).map(t=>t.fecha))].sort();FBM[m]=fs;
+  const g=[];fs.forEach(f=>{const k=lunesDe(f);let w=g.find(x=>x.k===k);if(!w){w={k,n:g.length+1,a:f,b:f};g.push(w)}w.b=f});WBM[m]=g;
+});
+T.forEach(t=>{const w=WBM[t.mes].find(w=>t.fecha>=w.a&&t.fecha<=w.b);t.semana=w?w.n:0});
+const FECHAS_M=()=>FBM[state.mes]||[];
+const WEEKS_M=()=>WBM[state.mes]||[];
+const TM=()=>T.filter(t=>t.mes===state.mes);
+const rango=()=>{const f=FECHAS_M();if(!f.length)return '';const a=d0(f[0]),b=d0(f[f.length-1]);return `${a.getDate()}–${b.getDate()} ${MES[b.getMonth()]}`};
+
+/* ═══════════════ ESTADO GLOBAL (única fuente de verdad) ═══════════════ */
+const state={
+  view:'resumen', mes:MESES[MESES.length-1], persona:'', empresa:'', sel:null,
+  equipoFiltro:'todas',
+  tabla:{estado:'',persona:'',semana:'',tema:'',q:'',sort:'fecha',dir:1},
+  overrides:store.get('ov',{}),
+  theme:store.get('theme','system')
+};
+const est=t=>state.overrides[t.id]||t.estadoFuente;
+const done=t=>est(t)==='Completada';
+const vencida=t=>!done(t)&&d0(t.fecha)<TODAY;
+const diasV=t=>Math.round((TODAY-d0(t.fecha))/864e5);
+const scopeBase=()=>T.filter(t=>t.mes===state.mes&&(!state.empresa||t.emps.includes(state.empresa)));
+const scope=()=>scopeBase().filter(t=>!state.persona||t.resp===state.persona);
+const stats=list=>{const c=list.filter(done).length;return{t:list.length,c,p:list.length-c,v:list.filter(vencida).length,r:pct(c,list.length)}};
+
+/* ═══════════════ COMPONENTES ═══════════════ */
+function avatarSVG(P){
+  const F=P.genero==='F',sk=P.piel||'#E8B48C',h=P.pelo||'#2A211C',c=P.ropa||'#6B7280';
+  return `<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+    ${F?`<path d="M15 36c-1-15 7-24 17-24s18 9 17 24c0 6-2 11-4 14H19c-2-3-4-8-4-14z" fill="${h}"/>`:''}
+    <path d="M27 38h10v9a5 5 0 0 1-10 0z" fill="${sk}"/><path d="M27 40h10v3c-3 2-7 2-10 0z" fill="#000" opacity=".08"/>
+    <path d="M7 66c1-12 11-19 25-19s24 7 25 19z" fill="${c}"/>
+    <path d="M26 47c2 3 4 4 6 4s4-1 6-4" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2"/>
+    ${F?'':`<ellipse cx="20.6" cy="29" rx="2.4" ry="3.2" fill="${sk}"/><ellipse cx="43.4" cy="29" rx="2.4" ry="3.2" fill="${sk}"/>`}
+    <ellipse cx="32" cy="28" rx="11.5" ry="13" fill="${sk}"/>
+    ${F?`<path d="M20 29c-1-10 5-17 12-17s13 6 12 17c-2-6-7-10-13-10-5 0-8 4-11 10z" fill="${h}"/>`
+       :`<path d="M20.4 26c-1.4-9 4.6-14.5 11.6-14.5S45 17 43.6 26c-1.8-4.4-6-6.8-11.6-6.8S22.2 21.6 20.4 26z" fill="${h}"/>`}
+    <circle cx="27.6" cy="29.5" r="1.3" fill="#2B2B2B"/><circle cx="36.4" cy="29.5" r="1.3" fill="#2B2B2B"/>
+    <path d="M28.6 35.2c2 1.6 4.8 1.6 6.8 0" fill="none" stroke="#9A5B45" stroke-width="1.4" stroke-linecap="round"/>
+  </svg>`;
+}
+const av=(p,cls='')=>{const P=DATA.personas[p];if(!P)return `<span class="av ${cls}" aria-hidden="true" style="background:var(--sub)"></span>`;return `<span class="av ${cls}" style="background:${P.bg}" aria-hidden="true">${avatarSVG(P)}</span>`};
+const pillEst=t=>done(t)
+  ? `<span class="pill ok">${ic('circle-check')}Completada</span>`
+  : vencida(t) ? `<span class="pill bad">${ic('circle-alert')}Vencida · ${diasV(t)} d</span>` : `<span class="pill warn">${ic('clock')}Pendiente</span>`;
+const emPills=t=>t.emps.map(e=>`<span class="ep">${e}</span>`).join('');
+const progBar=(c,t)=>`<div class="bar" role="img" aria-label="${c} de ${t} completadas"><div class="c" style="width:${pct(c,t)}%"></div><div class="p striped" style="width:${pct(t-c,t)}%"></div></div>`;
+const cnt=(v,dec=0,suf='')=>`<span class="num" data-count="${v}" data-dec="${dec}" data-suf="${suf}">${nf(v,dec)}${suf}</span>`;
+
+function countUp(root){
+  root.querySelectorAll('[data-count]').forEach(el=>{
+    const to=+el.dataset.count,dec=+el.dataset.dec,suf=el.dataset.suf||'';
+    if(RM){el.textContent=nf(to,dec)+suf;return}
+    const from=+(el.dataset.from||0),t0=performance.now(),D=520;
+    const step=now=>{const k=Math.min(1,(now-t0)/D),e=1-Math.pow(1-k,3);el.textContent=nf(from+(to-from)*e,dec)+suf;if(k<1)requestAnimationFrame(step)};
+    requestAnimationFrame(step);
+  });
+}
+function icons(){ document.querySelectorAll('i[data-lucide]').forEach(el=>{el.outerHTML=ic(el.dataset.lucide)}); }
+
+/* ═══════════════ TOP BAR ═══════════════ */
+const VIEWS=[{k:'resumen',l:'Resumen',i:'layout-dashboard'},{k:'equipo',l:'Equipo',i:'users'},{k:'tareas',l:'Tareas',i:'list-checks'}];
+function renderTabs(){
+  const s=stats(scope());
+  const counts={resumen:'',equipo:PEOPLE.length,tareas:s.t};
+  const tabs=$('#tabs');
+  tabs.querySelectorAll('.tab').forEach(b=>b.remove());
+  VIEWS.forEach(v=>{
+    const b=document.createElement('button');
+    b.className='tab';b.role='tab';b.id='tab-'+v.k;b.setAttribute('aria-controls','view');
+    b.setAttribute('aria-selected',state.view===v.k);b.tabIndex=state.view===v.k?0:-1;
+    b.innerHTML=`${ic(v.i)}${v.l}${counts[v.k]!==''?`<span class="cnt">${counts[v.k]}</span>`:''}${v.k==='tareas'&&s.p?`<span class="cnt alert" aria-label="${s.p} pendientes">${s.p}</span>`:''}`;
+    b.onclick=()=>go(v.k);
+    tabs.appendChild(b);
+  });
+  icons();moveInd();
+}
+function moveInd(){
+  const a=$('#tabs .tab[aria-selected="true"]'),ind=$('#tabInd');if(!a)return;
+  ind.style.width=a.offsetWidth+'px';ind.style.transform=`translateX(${a.offsetLeft}px)`;
+}
+$('#tabs').addEventListener('keydown',e=>{
+  if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;
+  const i=VIEWS.findIndex(v=>v.k===state.view);
+  let n=e.key==='ArrowRight'?i+1:e.key==='ArrowLeft'?i-1:e.key==='Home'?0:VIEWS.length-1;
+  n=(n+VIEWS.length)%VIEWS.length;go(VIEWS[n].k);$('#tab-'+VIEWS[n].k).focus();e.preventDefault();
+});
+
+function renderCtx(){
+  const s=stats(scope()),F=FECHAS_M();
+  $('#caption').textContent=`Panel de tareas · ${DATA.meta.area} · Corte ${F.length?fD(F[F.length-1]):'sin dato'}`;
+  // mes
+  $('#mesBtn').innerHTML=`<span class="mono">${ic('calendar')}</span><span><b>${mesLabel(state.mes)}</b><small>${TM().length} tareas · ${MESES.length} mes${MESES.length!==1?'es':''} con datos</small></span>${ic('chevron-down')}`;
+  $('#mesBtn').setAttribute('aria-label',`Mes: ${mesLabel(state.mes)}. Cambiar mes`);
+  $('#mesPop').innerHTML='<h6>Mes</h6>'+[...MESES].reverse().map(m=>{const st=stats(T.filter(t=>t.mes===m));
+    return `<button class="opt" role="option" aria-selected="${state.mes===m}" data-m="${m}"><span class="mono">${ic('calendar')}</span><span><b>${mesLabel(m)}</b><small>${st.t} tareas · ${nf(st.r,1)}% cumplido · ${st.p} pend.</small></span></button>`}).join('');
+  $('#mesPop').querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{setMes(b.dataset.m);closePops();$('#mesBtn').focus()});
+  // equipo y empresa
+  const who=(state.persona||'Todo el equipo')+(state.empresa?` · ${state.empresa}`:'');
+  $('#ctxBtn').innerHTML=`${state.persona?av(state.persona):`<span class="mono">${PEOPLE.length}</span>`}<span><b>${who}</b><small>${s.t} tareas · ${nf(s.r,1)}% cumplido</small></span>${ic('chevron-down')}`;
+  $('#ctxBtn').setAttribute('aria-label',`Mostrando: ${who}. ${s.t} tareas, ${nf(s.r,1)}% cumplido. Cambiar`);
+  const base=TM();
+  const pOpt=p=>{const st=stats(base.filter(t=>(!p||t.resp===p)&&(!state.empresa||t.emps.includes(state.empresa))));
+    return `<button class="opt" role="option" aria-selected="${state.persona===p}" data-cp="${p}">${p?av(p):`<span class="mono">${PEOPLE.length}</span>`}<span><b>${p||'Todo el equipo'}</b><small>${p?esc(DATA.personas[p].rol)+' · ':''}${st.t} tareas · ${nf(st.r,1)}%</small></span></button>`};
+  const eOpt=e=>{const st=stats(base.filter(t=>(!e||t.emps.includes(e))&&(!state.persona||t.resp===state.persona)));
+    return `<button class="opt" role="option" aria-selected="${state.empresa===e}" data-ce="${e}"><span class="mono">${e?DATA.empresas[e].ini:ic('building')}</span><span><b>${e||'Todas las empresas'}</b><small>${st.t} tareas · ${nf(st.r,1)}%</small></span></button>`};
+  $('#ctxPop').innerHTML='<h6>Equipo</h6>'+['',...PEOPLE].map(pOpt).join('')+'<h6>Empresa</h6>'+['',...EMPRESAS].map(eOpt).join('');
+  $('#ctxPop').querySelectorAll('[data-cp]').forEach(b=>b.onclick=()=>{setCtx({persona:b.dataset.cp});closePops();$('#ctxBtn').focus()});
+  $('#ctxPop').querySelectorAll('[data-ce]').forEach(b=>b.onclick=()=>{setCtx({empresa:b.dataset.ce});closePops();$('#ctxBtn').focus()});
+  $('#foot').textContent=`Fuente: ${DATA.meta.fuente} · ${mesLabel(state.mes)}: ${TM().length} filas · Pendientes «vencidas» calculadas a ${fD(TODAY_ISO)}`;
+}
+const POPS=[['mesBtn','mesPop'],['ctxBtn','ctxPop']];
+function closePops(){POPS.forEach(([b,p])=>{$('#'+p).classList.remove('on');$('#'+b).setAttribute('aria-expanded','false')})}
+POPS.forEach(([b,p])=>{
+  $('#'+b).onclick=()=>{const was=$('#'+p).classList.contains('on');closePops();if(was)return;$('#'+p).classList.add('on');$('#'+b).setAttribute('aria-expanded','true');($('#'+p+' .opt[aria-selected="true"]')||$('#'+p+' .opt')).focus()};
+  $('#'+p).addEventListener('keydown',e=>{
+    const os=[...$('#'+p).querySelectorAll('.opt')],i=os.indexOf(document.activeElement);
+    if(e.key==='ArrowDown'){os[(i+1)%os.length].focus();e.preventDefault()}
+    if(e.key==='ArrowUp'){os[(i-1+os.length)%os.length].focus();e.preventDefault()}
+    if(e.key==='Escape'){closePops();$('#'+b).focus()}
+  });
+});
+function setMes(m){
+  if(state.mes===m)return;
+  state.mes=m;state.sel=null;state.tabla.semana='';
+  transition(()=>renderAll());
+  toast(`Mostrando ${mesLabel(m)}`);
+}
+function setCtx(o){
+  const prev={persona:state.persona,empresa:state.empresa};
+  Object.assign(state,o);
+  if(prev.persona===state.persona&&prev.empresa===state.empresa)return;
+  if('persona' in o)state.tabla.persona='';
+  transition(()=>renderAll());
+  toast(`Mostrando ${(state.persona||'todo el equipo')}${state.empresa?' en '+state.empresa:''}`);
+}
+
+/* búsqueda global */
+const qEl=$('#q'),sres=$('#sres');
+qEl.addEventListener('input',()=>{
+  const q=qEl.value.trim().toLowerCase();
+  if(!q){sres.classList.remove('on');qEl.setAttribute('aria-expanded','false');return}
+  const ps=PEOPLE.filter(p=>p.toLowerCase().includes(q)||DATA.personas[p].rol.toLowerCase().includes(q));
+  const ts=TM().filter(t=>[t.act,t.ent,t.resp,t.empresa,fD(t.fecha),t.dia,t.id].join(' ').toLowerCase().includes(q)).slice(0,8);
+  let h='';
+  if(ps.length)h+='<h6>Personas</h6>'+ps.map(p=>`<button class="opt" role="option" data-p="${p}">${av(p)}<span><b>${p}</b><small>${esc(DATA.personas[p].rol)}</small></span></button>`).join('');
+  if(ts.length)h+='<h6>Tareas</h6>'+ts.map(t=>`<button class="opt" role="option" data-t="${t.i}">${av(t.resp)}<span><b>${esc(t.act)}</b><small>${fDs(t.fecha)} · ${t.resp} · ${est(t)}</small></span></button>`).join('');
+  sres.innerHTML=h||'<p class="empty">Sin resultados para «'+esc(qEl.value)+'».</p>';
+  sres.classList.add('on');qEl.setAttribute('aria-expanded','true');
+  sres.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    sres.classList.remove('on');qEl.value='';
+    if(b.dataset.p)openPerson(b.dataset.p);else openTask(+b.dataset.t);
+  });
+});
+qEl.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'){const f=sres.querySelector('.opt');if(f){f.focus();e.preventDefault()}}
+  if(e.key==='Enter'){const f=sres.querySelector('.opt');if(f)f.click()}
+  if(e.key==='Escape'){sres.classList.remove('on');qEl.blur()}
+});
+sres.addEventListener('keydown',e=>{
+  const os=[...sres.querySelectorAll('.opt')],i=os.indexOf(document.activeElement);
+  if(e.key==='ArrowDown'){os[Math.min(i+1,os.length-1)].focus();e.preventDefault()}
+  if(e.key==='ArrowUp'){i<=0?qEl.focus():os[i-1].focus();e.preventDefault()}
+  if(e.key==='Escape'){sres.classList.remove('on');qEl.focus()}
+});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.search'))sres.classList.remove('on');
+  if(!e.target.closest('.pick'))closePops();
+});
+document.addEventListener('keydown',e=>{
+  const typing=/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName);
+  if(e.key==='/'&&!typing){e.preventDefault();qEl.focus()}
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();qEl.focus()}
+  if(e.key==='Escape'&&$('#insp').classList.contains('on'))closeInsp();
+});
+
+/* tema */
+const mqDark=matchMedia('(prefers-color-scheme: dark)');
+function applyTheme(){
+  const t=state.theme==='system'?(mqDark.matches?'dark':'light'):state.theme;
+  document.documentElement.dataset.theme=t;
+  document.querySelectorAll('#themeSeg [data-th]').forEach(b=>{const on=b.dataset.th===state.theme;b.setAttribute('aria-checked',on);b.tabIndex=on?0:-1});
+}
+mqDark.addEventListener('change',()=>{if(state.theme==='system')applyTheme()});
+const TH_MSG={system:'Apariencia según el sistema',light:'Modo claro activado',dark:'Modo oscuro activado'};
+function setTheme(k){state.theme=k;store.set('theme',k);transition(applyTheme);toast(TH_MSG[k])}
+document.querySelectorAll('#themeSeg [data-th]').forEach(b=>b.onclick=()=>setTheme(b.dataset.th));
+$('#themeSeg').addEventListener('keydown',e=>{
+  const ks=['system','light','dark'],i=ks.indexOf(state.theme);let n=-1;
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')n=(i+1)%3;if(e.key==='ArrowLeft'||e.key==='ArrowUp')n=(i+2)%3;
+  if(n<0)return;e.preventDefault();setTheme(ks[n]);$(`#themeSeg [data-th="${ks[n]}"]`).focus();
+});
+
+/* ═══════════════ NAVEGACIÓN ═══════════════ */
+function transition(fn){ if(document.startViewTransition&&!RM) document.startViewTransition(fn); else fn(); }
+function go(v){ if(state.view===v)return; state.view=v; transition(()=>{renderTabs();renderView();window.scrollTo({top:0,behavior:RM?'auto':'smooth'})}); }
+
+/* ═══════════════ VISTA: RESUMEN ═══════════════ */
+function insights(list){
+  const out=[],s=stats(list),M=DATA.meta.metaCumplimiento;
+  if(!s.t)return out;
+  const diff=s.r-M;
+  out.push({txt:`El cumplimiento del mes es ${nf(s.r,1)}% (${s.c} de ${s.t}), ${diff>=0?nf(diff,1)+' pp por encima':nf(-diff,1)+' pp por debajo'} de la meta del ${M}%.`,
+    src:`Columna «Estado» · ${rango()} · Confianza alta (dato directo)`,act:()=>openSet('Todas las tareas del mes',list)});
+  const ws=WEEKS_M().map(w=>({w,l:list.filter(t=>t.semana===w.n)})).filter(x=>x.l.length).map(x=>({...x,s:stats(x.l)}));
+  const worst=[...ws].sort((a,b)=>a.s.r-b.s.r)[0];
+  if(worst&&worst.s.p){
+    const okW=ws.filter(x=>x.s.p===0).map(x=>'S'+x.w.n);
+    out.push({txt:`El hueco está en la semana ${worst.w.n} (${fDs(worst.w.a)}–${fDs(worst.w.b)}): ${worst.s.c} de ${worst.s.t} cerradas.${okW.length?` ${okW.join(', ')} cerraron al 100%.`:''}`,
+      src:`Columnas «Fecha» y «Estado» · Confianza alta`,act:()=>openSet(`Semana ${worst.w.n} · ${fDs(worst.w.a)}–${fDs(worst.w.b)}`,worst.l)});
+  }
+  const ov=list.filter(vencida).sort((a,b)=>a.fecha.localeCompare(b.fecha));
+  if(ov.length){const o=ov[0];
+    out.push({txt:`La pendiente más antigua es de ${o.resp} (${fDs(o.fecha)}): «${o.act}». Lleva ${diasV(o)} días sin cerrarse.`,
+      src:`Fila ${o.fila} del Excel · Confianza alta`,act:()=>openTask(o.i)});
+  }
+  const pp=PEOPLE.map(p=>({p,s:stats(list.filter(t=>t.resp===p))})).filter(x=>x.s.t);
+  if(pp.length>1){
+    const lo=[...pp].sort((a,b)=>a.s.r-b.s.r||b.s.p-a.s.p)[0], hi=[...pp].sort((a,b)=>b.s.r-a.s.r)[0];
+    const tops=pp.filter(x=>x.s.r===hi.s.r).map(x=>x.p);
+    if(lo.s.r<hi.s.r) out.push({txt:`${tops.join(' y ')} ${tops.length>1?'lideran':'lidera'} con ${nf(hi.s.r,1)}%; ${lo.p} tiene el menor cumplimiento (${nf(lo.s.r,1)}%, ${lo.s.p} pendiente${lo.s.p!==1?'s':''}).`,
+      src:`Columnas «Responsable» y «Estado» · Confianza alta`,act:()=>openPerson(lo.p)});
+  }
+  const th=THEMES.map(t=>({t,l:list.filter(x=>x.temas.includes(t.k))})).sort((a,b)=>b.l.length-a.l.length)[0];
+  if(th&&th.l.length) out.push({txt:`«${th.t.l}» es la labor más repetida: aparece en ${th.l.length} de ${s.t} tareas (${nf(pct(th.l.length,s.t),0)}%).`,
+    src:`Columna «Actividades», clasificada por palabras clave · Confianza media`,act:()=>openSet(th.t.l,th.l)});
+  return out.slice(0,5);
+}
+function lineChart(list){
+  const W=Math.round(Math.min(640,Math.max(340,(($('#view').clientWidth||700)-48)*(innerWidth>1180?0.66:1)))),H=Math.round(W*0.36)+20,pl=34,pr=14,pt=14,pb=28;
+  const pts=FECHAS_M().map(f=>{const up=list.filter(t=>t.fecha<=f);return{f,p:up.length,c:up.filter(done).length,day:list.filter(t=>t.fecha===f)}});
+  const max=Math.max(1,...pts.map(p=>p.p));
+  const x=i=>pl+i*(W-pl-pr)/Math.max(1,pts.length-1), y=v=>pt+(1-v/max)*(H-pt-pb);
+  const lp=pts.map((p,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(p.p).toFixed(1)}`).join('');
+  const lc=pts.map((p,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(p.c).toFixed(1)}`).join('');
+  const area=lc+`L${x(pts.length-1)},${y(0)}L${x(0)},${y(0)}Z`;
+  const ticks=[0,Math.round(max/2),max];
+  let g=ticks.map(v=>`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--line)" stroke-dasharray="${v?'2 4':''}"/><text x="${pl-8}" y="${y(v)+4}" text-anchor="end" font-size="11" style="fill:var(--tx3)">${v}</text>`).join('');
+  pts.forEach((p,i)=>{ if(i%3===0||i===pts.length-1) g+=`<text x="${x(i)}" y="${H-8}" text-anchor="middle" font-size="11" style="fill:var(--tx3)">${d0(p.f).getDate()}</text>`; });
+  const last=pts[pts.length-1];
+  const lab=`<text x="${x(pts.length-1)-4}" y="${y(last.p)-8}" text-anchor="end" font-size="11.5" font-weight="600" style="fill:var(--tx2)">Programadas ${last.p}</text>
+    <text x="${x(pts.length-1)-4}" y="${y(last.c)+30}" text-anchor="end" font-size="11.5" font-weight="700" style="fill:var(--acc)">Completadas ${last.c}</text>`;
+  const hits=pts.map((p,i)=>`<rect class="hit" data-i="${i}" x="${x(i)-(W-pl-pr)/(pts.length-1)/2}" y="${pt}" width="${(W-pl-pr)/(pts.length-1)}" height="${H-pt-pb}" fill="transparent" style="cursor:pointer"/>`).join('');
+  const firstGap=pts.findIndex(p=>p.p>p.c);
+  const title= last.p===last.c ? 'Todo lo programado en el mes quedó cerrado'
+    : firstGap>0 ? `Al día hasta el ${fDs(pts[firstGap-1].f)}; el mes cierra con ${last.p-last.c} abierta${last.p-last.c!==1?'s':''}`
+    : `El mes cierra con ${last.p-last.c} tareas abiertas`;
+  const table=`<table class="sr"><caption>Avance acumulado por día</caption><tr><th>Día</th><th>Programadas</th><th>Completadas</th></tr>${pts.map(p=>`<tr><td>${fDs(p.f)}</td><td>${p.p}</td><td>${p.c}</td></tr>`).join('')}</table>`;
+  return {title,pts,html:`<div class="chart" id="lc"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(title)}. Programadas acumuladas ${last.p}, completadas ${last.c}.">
+    ${g}<path d="${area}" fill="url(#areaG)"/><path d="${lp}" fill="none" style="stroke:var(--tx3)" stroke-width="2" stroke-dasharray="5 5"/>
+    <path d="${lc}" fill="none" style="stroke:var(--acc)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <line id="guide" y1="${pt}" y2="${H-pb}" style="stroke:var(--tx);opacity:0" stroke-width="1"/>
+    <circle id="gp" r="5" style="fill:var(--card);stroke:var(--acc);opacity:0" stroke-width="3"/>
+    ${lab}${hits}</svg><div class="tip" id="tip"></div>${table}</div>`,x,y,W};
+}
+function renderResumen(v){
+  const L=scope(),s=stats(L),M=DATA.meta.metaCumplimiento;
+  const lc=lineChart(L);
+  const ov=L.filter(t=>!done(t)).sort((a,b)=>a.fecha.localeCompare(b.fecha));
+  const wk=WEEKS_M().map(w=>{const l=L.filter(t=>t.semana===w.n);return{w,l,s:stats(l)}});
+  const wmax=Math.max(1,...wk.map(x=>x.s.t));
+  const ins=insights(L);
+  const R=110,C=Math.PI*R,cx=140,cy=130;
+  const arc=`M${cx-R},${cy} A${R},${R} 0 0 1 ${cx+R},${cy}`;
+  const ma=Math.PI*(1-M/100), mx1=cx+(R-22)*Math.cos(ma), my1=cy-(R-22)*Math.sin(ma), mx2=cx+(R+22)*Math.cos(ma), my2=cy-(R+22)*Math.sin(ma);
+  const ml=mx2+4, mly=my2-10;
+
+  v.innerHTML=`
+  <h1 class="sr">Resumen</h1>
+  <div class="bento">
+    <button class="card kpi hero c3 enter" style="--i:0" data-kpi="all" aria-label="Cumplimiento ${nf(s.r,1)} por ciento. Ver todas las tareas">
+      <span class="kh"><span class="k">Cumplimiento del mes</span><span class="ico">${ic('gauge')}</span></span>
+      <span class="v">${cnt(s.r,1,'%')}</span><span class="s">${s.c} de ${s.t} tareas cerradas</span>
+      <span class="kf">${progBar(s.c,s.t)}<span class="kf-row"><span>Meta <b>${M}%</b></span><span><b>${s.r>=M?'+':''}${nf(s.r-M,1)} pp</b> ${s.r>=M?'sobre':'bajo'} la meta</span></span></span></button>
+    <button class="card kpi hov c3 enter" style="--i:1" data-kpi="comp">
+      <span class="kh"><span class="k">Completadas</span><span class="ico">${ic('circle-check')}</span></span>
+      <span class="v">${cnt(s.c)}<small>de ${s.t}</small></span><span class="s">en ${new Set(L.map(t=>t.fecha)).size} días hábiles</span>
+      <span class="kf">${progBar(s.c,s.t)}<span class="kf-row"><span>Avance</span><b>${nf(s.r,1)}%</b></span></span></button>
+    <button class="card kpi hov c3 enter" style="--i:2" data-kpi="pend">
+      <span class="kh"><span class="k">Pendientes</span><span class="ico" style="${s.p?'background:var(--bad-l);color:var(--bad)':''}">${ic('circle-alert')}</span></span>
+      <span class="v" style="color:${s.p?'var(--bad)':'inherit'}">${cnt(s.p)}</span><span class="s">${s.v} vencida${s.v!==1?'s':''} a hoy</span>
+      <span class="kf">${(()=>{const o=L.filter(t=>!done(t)).sort((a,b)=>a.fecha.localeCompare(b.fecha))[0];return o?`<span class="pill bad">${ic('clock')}La más antigua: ${diasV(o)} días</span><span class="kf-row"><span>${o.resp} · ${fDs(o.fecha)}</span></span>`:`<span class="pill ok">${ic('circle-check')}Nada pendiente</span>`})()}</span></button>
+    <button class="card kpi hov c3 enter" style="--i:3" data-kpi="all">
+      <span class="kh"><span class="k">Tareas programadas</span><span class="ico">${ic('calendar-days')}</span></span>
+      <span class="v">${cnt(s.t)}</span><span class="s">${PEOPLE.filter(p=>L.some(t=>t.resp===p)).length} personas · ${rango()}</span>
+      <span class="kf"><span class="wspark" aria-hidden="true">${(()=>{const ws=WEEKS_M().map(w=>L.filter(t=>t.semana===w.n));const mx=Math.max(1,...ws.map(l=>l.length));return ws.map(l=>`<span style="height:${Math.max(8,l.length/mx*100)}%"><i style="height:${pct(l.filter(done).length,l.length)}%"></i></span>`).join('')})()}</span><span class="kf-row">${WEEKS_M().map(w=>`<span>S${w.n}</span>`).join('')}</span></span></button>
+
+    <section class="card c8 enter" style="--i:4" aria-labelledby="h-lc">
+      <div class="ch"><div><div class="lbl">${ic('trending-up')}Avance acumulado</div><h3 id="h-lc">${esc(lc.title)}</h3></div><button class="go" data-set="all" aria-label="Ver detalle completo">${ic('arrow-up-right')}</button></div>
+      ${lc.html}
+      <div class="legend" style="justify-content:flex-start"><span><i style="background:var(--acc)"></i>Completadas (acumulado)</span><span><i style="background:transparent;border:2px dashed var(--tx3)"></i>Programadas (acumulado)</span><span style="color:var(--tx3)">Clic en un día para ver sus tareas</span></div>
+    </section>
+
+    <section class="card c4 enter" style="--i:5" aria-labelledby="h-g">
+      <div class="ch"><div><div class="lbl">${ic('target')}Meta de cumplimiento</div><h3 id="h-g">${s.r>=M?`Por encima de la meta del ${M}%`:`Por debajo de la meta del ${M}%`}</h3></div></div>
+      <div class="gauge-wrap" id="gauge" role="button" tabindex="0" aria-label="Medidor: ${nf(s.r,1)}% completado, meta ${M}%. Ver todas las tareas">
+        <svg viewBox="0 0 280 160" aria-hidden="true">
+          <path d="${arc}" fill="none" stroke="url(#stripes)" stroke-width="26"/>
+          <path id="gArc" d="${arc}" fill="none" style="stroke:var(--acc)" stroke-width="26" stroke-dasharray="0 ${C}"/>
+          <circle cx="${cx+R*Math.cos(ma)}" cy="${cy-R*Math.sin(ma)}" r="9" style="fill:var(--warn);stroke:var(--card)" stroke-width="3.5"/>
+        </svg>
+        <div class="gauge-c"><b>${cnt(s.r,1,'%')}</b><span>${s.c} completada${s.c!==1?'s':''} · ${s.p} pendiente${s.p!==1?'s':''}</span></div>
+      </div>
+      <div class="gchips"><span class="gchip ok"><b class="num">${nf(s.r,1)}%</b><span>Cumplido</span></span><span class="gchip warn"><b class="num">${M}%</b><span>Meta</span></span><span class="gchip ${s.r>=M?'ok':'bad'}"><b class="num">${s.r>=M?'+':''}${nf(s.r-M,1)}</b><span>pp vs meta</span></span></div>
+      <div class="legend"><span><i style="background:var(--acc)"></i>Completado</span><span><i class="striped"></i>Pendiente</span><span><i style="background:var(--warn);border-radius:50%"></i>Punto de la meta</span></div>
+    </section>
+
+    <section class="card c4 enter" style="--i:6" aria-labelledby="h-al">
+      <div class="ch"><div><div class="lbl">${ic('bell-ring')}Alertas</div><h3 id="h-al">${ov.length?`${ov.length} tarea${ov.length!==1?'s':''} del mes sin cerrar`:'Sin pendientes'}</h3></div>${ov.length?`<button class="go" data-set="pend" aria-label="Ver todas las pendientes">${ic('arrow-up-right')}</button>`:''}</div>
+      ${ov.length?`<button class="alert-hero" data-t="${ov[0].i}"><span class="big num">${diasV(ov[0])} días</span><p><b>${esc(ov[0].act)}</b></p><small>${ov[0].resp} · programada ${fD(ov[0].fecha)} · la más antigua</small></button>
+      ${ov.slice(1).map(t=>`<button class="row" data-t="${t.i}">${av(t.resp)}<span class="meta"><b>${esc(t.act)}</b><small>${t.resp} · ${fDs(t.fecha)}</small></span><span class="pill bad">${diasV(t)} d</span></button>`).join('')}`
+      :`<p class="empty">${ic('party-popper')} Todo lo programado está cerrado.</p>`}
+    </section>
+
+    <section class="card c4 enter" style="--i:7" aria-labelledby="h-wk">
+      <div class="ch"><div><div class="lbl">${ic('chart-column')}Por semana</div><h3 id="h-wk">${(()=>{const bad=wk.filter(x=>x.s.p);return bad.length?`${bad.length===1?'Solo la semana '+bad[0].w.n+' quedó':'Las semanas '+bad.map(x=>x.w.n).join(' y ')+' quedaron'} incompleta${bad.length>1?'s':''}`:'Todas las semanas al 100%'})()}</h3></div></div>
+      <div class="cols" role="list">
+        ${wk.map(x=>`<button class="col" role="listitem" data-w="${x.w.n}" aria-label="Semana ${x.w.n}, ${fDs(x.w.a)} a ${fDs(x.w.b)}: ${x.s.c} de ${x.s.t} completadas">
+          <span class="tag num">${x.s.c}/${x.s.t}</span>
+          <span class="col-bar" style="height:${pct(x.s.t,wmax)*0.78}%"><span class="p striped" style="height:${pct(x.s.p,x.s.t)}%"></span><span class="c"></span></span>
+          <small>S${x.w.n}<span>${d0(x.w.a).getDate()}–${d0(x.w.b).getDate()}</span></small></button>`).join('')}
+      </div>
+      <div class="legend"><span><i style="background:var(--acc)"></i>Completadas</span><span><i class="striped"></i>Pendientes</span></div>
+    </section>
+
+    <section class="card c4 enter" style="--i:8" aria-labelledby="h-ins">
+      <div class="ch"><div><div class="lbl">${ic('sparkles')}Insights</div><h3 id="h-ins">Lo que dicen los datos</h3></div></div>
+      ${ins.map((x,i)=>`<button class="ins" data-ins="${i}"><span class="n">${i+1}</span><span><p>${esc(x.txt)}</p><small>${esc(x.src)}</small></span></button>`).join('')}
+    </section>
+
+    <section class="card c12 enter" style="--i:9" aria-labelledby="h-pp">
+      <div class="ch"><div><div class="lbl">${ic('users')}Equipo</div><h3 id="h-pp">Cumplimiento por persona</h3></div><button class="go" data-go="equipo" aria-label="Ir a la vista Equipo">${ic('arrow-up-right')}</button></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:4px 18px">
+      ${PEOPLE.map(p=>{const l=L.filter(t=>t.resp===p),st=stats(l);if(!st.t)return '';return `<button class="row ${state.sel?.type==='person'&&state.sel.id===p?'is-sel':''}" data-p="${p}">${av(p)}<span class="meta"><b>${p}</b><small>${esc(DATA.personas[p].rol)}</small><span style="display:block;margin-top:6px">${progBar(st.c,st.t)}</span></span><span class="frac num">${nf(st.r,0)}%<br><span style="font-weight:400;color:var(--tx3)">${st.c}/${st.t}</span></span>${ic('chevron-right')}</button>`}).join('')}
+      </div>
+    </section>
+  </div>`;
+
+  // eventos
+  v.querySelectorAll('[data-kpi]').forEach(b=>b.onclick=()=>{const k=b.dataset.kpi;
+    if(k==='comp')openSet('Tareas completadas',L.filter(done));else if(k==='pend')openSet('Tareas pendientes',L.filter(t=>!done(t)));else openSet('Todas las tareas del mes',L)});
+  v.querySelectorAll('[data-set]').forEach(b=>b.onclick=()=>b.dataset.set==='pend'?openSet('Tareas pendientes',L.filter(t=>!done(t))):openSet('Todas las tareas del mes',L));
+  v.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>openTask(+b.dataset.t));
+  v.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>openPerson(b.dataset.p));
+  v.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{const w=WEEKS_M()[b.dataset.w-1];openSet(`Semana ${w.n} · ${fDs(w.a)}–${fDs(w.b)}`,L.filter(t=>t.semana===w.n))});
+  v.querySelectorAll('[data-ins]').forEach(b=>b.onclick=()=>ins[+b.dataset.ins].act());
+  v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+  const bp=v.querySelector('#btnPend');if(bp)bp.onclick=()=>{state.tabla={...state.tabla,estado:'Pendiente'};go('tareas')};
+  const gauge=v.querySelector('#gauge');
+  gauge.onclick=()=>openSet('Todas las tareas del mes',L);
+  gauge.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();gauge.click()}};
+  // anillo animado
+  const gA=v.querySelector('#gArc'),len=C*s.r/100;
+  if(RM)gA.setAttribute('stroke-dasharray',`${len} ${C}`);
+  else requestAnimationFrame(()=>{gA.style.transition='stroke-dasharray .6s cubic-bezier(.2,.8,.2,1)';requestAnimationFrame(()=>gA.setAttribute('stroke-dasharray',`${len} ${C}`))});
+  // tooltip de línea
+  const box=v.querySelector('#lc'),svg=box.querySelector('svg'),tip=box.querySelector('#tip'),guide=svg.querySelector('#guide'),gp=svg.querySelector('#gp');
+  svg.querySelectorAll('.hit').forEach(r=>{
+    const i=+r.dataset.i,p=lc.pts[i];
+    r.onmouseenter=()=>{const X=lc.x(i);guide.setAttribute('x1',X);guide.setAttribute('x2',X);guide.style.opacity=.25;gp.setAttribute('cx',X);gp.setAttribute('cy',lc.y(p.c));gp.style.opacity=1;
+      const sc=svg.getBoundingClientRect().width/lc.W;tip.style.left=X*sc+'px';tip.style.top=lc.y(p.p)*sc+'px';
+      const dc=p.day.filter(done).length;
+      tip.innerHTML=`<b>${cap(p.day[0]?.dia||'')} ${fDs(p.f)}</b><br>Acumulado: ${p.c} de ${p.p}<br>Ese día: ${dc}/${p.day.length} cerradas`;tip.classList.add('on')};
+    r.onmouseleave=()=>{tip.classList.remove('on');guide.style.opacity=0;gp.style.opacity=0};
+    r.onclick=()=>openSet(`${cap(p.day[0]?.dia||'')} ${fD(p.f)}`,p.day);
+  });
+}
+
+/* ═══════════════ VISTA: EQUIPO ═══════════════ */
+function renderEquipo(v){
+  const L=scope();
+  const ps=PEOPLE.map(p=>({p,l:L.filter(t=>t.resp===p)})).map(x=>({...x,s:stats(x.l)})).filter(x=>x.s.t);
+  const F={todas:()=>true,pend:x=>x.s.p>0,ok:x=>x.s.p===0};
+  const cF={todas:ps.length,pend:ps.filter(F.pend).length,ok:ps.filter(F.ok).length};
+  const vis=ps.filter(F[state.equipoFiltro]);
+  const th=THEMES.map(t=>({t,l:L.filter(x=>x.temas.includes(t.k))})).filter(x=>x.l.length).sort((a,b)=>b.l.length-a.l.length);
+  const thMax=Math.max(1,...th.map(x=>x.l.length));
+  const sinTema=L.filter(t=>!t.temas.length);
+
+  v.innerHTML=`
+  <div class="vhead"><h1 class="sr">Equipo</h1>
+    <div class="chips" role="group" aria-label="Filtrar personas">
+      ${[['todas','Todas'],['pend','Con pendientes'],['ok','Al 100%']].map(([k,l])=>`<button class="chip" aria-pressed="${state.equipoFiltro===k}" data-f="${k}">${l}<span class="cnt">${cF[k]}</span></button>`).join('')}
+    </div></div>
+  <div class="people" id="people" aria-live="polite">
+    ${vis.map((x,i)=>{const P=DATA.personas[x.p];return `<article class="card hov pcard enter ${state.sel?.type==='person'&&state.sel.id===x.p?'is-sel':''}" style="--i:${i}" data-key="${x.p}" tabindex="0" role="button" aria-label="${x.p}, ${P.rol}. ${nf(x.s.r,1)}% de cumplimiento, ${x.s.p} pendientes. Ver detalle">
+      <div class="top-row">${av(x.p)}<div style="flex:1;min-width:0"><h4>${x.p}</h4><div class="rol">${esc(P.rol)}</div></div>${x.s.p?`<span class="pill bad">${ic('circle-alert')}${x.s.p} pend.</span>`:`<span class="pill ok">${ic('circle-check')}Al día</span>`}</div>
+      <div class="pm"><div class="subc"><b class="num">${x.s.t}</b><span>tareas en el mes</span></div><div class="subc"><b class="num">${nf(x.s.r,1)}%</b><span>cumplimiento</span></div></div>
+      <div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--tx2);margin-bottom:6px"><span>${x.s.c} completada${x.s.c!==1?'s':''}</span><span>${x.s.p} pendiente${x.s.p!==1?'s':''}</span></div>${progBar(x.s.c,x.s.t)}</div>
+      <div style="font-size:12px;color:var(--tx3)">Foco diario: ${esc(P.foco)}</div>
+      <div class="pact"><button class="btn sec sm" data-open="${x.p}">${ic('panel-right-open')}Ver perfil</button><button class="btn sec sm" data-items="${x.p}">${ic('list')}Sus tareas</button></div>
+    </article>`}).join('')||'<p class="empty">Nadie coincide con este filtro.</p>'}
+  </div>
+
+  <div class="bento" style="margin-top:18px">
+    <section class="card c12 enter" style="--i:4" aria-labelledby="h-mx">
+      <div class="ch"><div><div class="lbl">${ic('calendar-check')}Calendario de cumplimiento</div><h3 id="h-mx">Cada casilla es una tarea del cronograma: los pendientes se agrupan al cierre del mes</h3></div></div>
+      <div class="mx-wrap">${matrix(L)}</div>
+      <div class="legend" style="justify-content:flex-start"><span><i style="background:var(--acc)"></i>✓ Completada</span><span><i style="background:repeating-linear-gradient(45deg,var(--bad-l) 0 3px,transparent 3px 6px);box-shadow:inset 0 0 0 2px var(--bad)"></i>! Pendiente</span><span><i style="background:var(--sub)"></i>— Sin tarea en el Excel</span><span style="color:var(--tx3)">Flechas para moverse · Enter para abrir</span></div>
+    </section>
+    <section class="card c12 enter" style="--i:5" aria-labelledby="h-th">
+      <div class="ch"><div><div class="lbl">${ic('layers')}En qué se va el trabajo</div><h3 id="h-th">${th[0]?`«${th[0].t.l}» y «${th[1]?.t.l||''}» son las labores más frecuentes del mes`:'Sin datos'}</h3></div></div>
+      <p style="font-size:12.5px;color:var(--tx2);margin:-6px 0 12px">Clasificación por palabras clave de la columna «Actividades». Una tarea puede sumar en varias labores.${sinTema.length?` ${sinTema.length} tarea${sinTema.length!==1?'s':''} sin clasificar.`:''}</p>
+      <div class="thgrid" style="--rows:${Math.ceil(th.length/2)}">
+      ${th.map(x=>{const c=x.l.filter(done).length;return `<button class="hbar" data-th="${x.t.k}" aria-label="${x.t.l}: ${x.l.length} tareas, ${c} completadas"><span class="t">${x.t.l}</span><span class="track"><span class="c" style="width:${c/thMax*100}%"></span><span class="striped" style="width:${(x.l.length-c)/thMax*100}%"></span></span><span class="v num">${x.l.length}${x.l.length-c?` <span style="color:var(--bad);font-weight:600">· ${x.l.length-c} pend.</span>`:''}</span></button>`}).join('')}
+      </div>
+    </section>
+  </div>`;
+
+  v.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{
+    const ppl=v.querySelector('#people');const before=flipFirst(ppl);
+    state.equipoFiltro=b.dataset.f;renderEquipo(v);icons();countUp(v);
+    flipPlay(v.querySelector('#people'),before);
+    toast(`${v.querySelectorAll('.pcard').length} persona${v.querySelectorAll('.pcard').length!==1?'s':''} · ${b.textContent.replace(/\d+$/,'').trim()}`);
+  });
+  v.querySelectorAll('.pcard').forEach(c=>{
+    c.onclick=e=>{if(e.target.closest('[data-items]'))return;openPerson(c.dataset.key)};
+    c.onkeydown=e=>{if(e.target===c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openPerson(c.dataset.key)}};
+  });
+  v.querySelectorAll('[data-items]').forEach(b=>b.onclick=e=>{e.stopPropagation();state.tabla={...state.tabla,persona:b.dataset.items,estado:'',semana:'',tema:'',q:''};go('tareas')});
+  v.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{const x=th.find(y=>y.t.k===b.dataset.th);openSet(x.t.l,x.l,'Labor')});
+  wireMatrix(v,L);
+}
+function matrix(L){
+  const ids=new Set(L.map(t=>t.i));
+  let h='<table class="mx" role="grid" aria-label="Calendario de cumplimiento por persona y día"><thead><tr><th></th>';
+  WEEKS_M().forEach(w=>{const n=FECHAS_M().filter(f=>f>=w.a&&f<=w.b).length;h+=`<th class="wk" colspan="${n}">Semana ${w.n}</th>`});
+  h+='</tr><tr><th><span class="sr">Persona</span></th>'+FECHAS_M().map(f=>{const t=T.find(x=>x.fecha===f);return `<th scope="col"><abbr title="${t.dia} ${fD(f)}" style="text-decoration:none">${t.dia.slice(0,2)}<br>${d0(f).getDate()}</abbr></th>`}).join('')+'</tr></thead><tbody>';
+  (state.persona?[state.persona]:PEOPLE).forEach((p,r)=>{
+    h+=`<tr data-row="${p}" class="${state.sel?.type==='person'&&state.sel.id===p?'is-sel':''}"><td class="nm"><button class="row" data-p="${p}" aria-label="Ver perfil de ${p}">${av(p)}<b style="font-size:13px">${p}</b></button></td>`;
+    FECHAS_M().forEach((f,c)=>{
+      const t=T.find(x=>x.fecha===f&&x.resp===p);
+      if(!t){h+=`<td><span class="cell no" data-r="${r}" data-c="${c}" tabindex="-1" role="gridcell" aria-label="${p}, ${fD(f)}: sin tarea registrada en el Excel" title="Sin tarea registrada">—</span></td>`;return}
+      const ok=done(t),sel=state.sel?.type==='task'&&state.sel.id===t.i;
+      h+=`<td><span class="cell ${ok?'ok':'pe'} ${ids.has(t.i)?'':'dim'} ${sel?'is-sel':''}" data-t="${t.i}" data-r="${r}" data-c="${c}" tabindex="-1" role="gridcell" aria-label="${p}, ${t.dia} ${fD(f)}: ${esc(t.act)}. ${ok?'Completada':'Pendiente'}">${ic(ok?'check':'circle-alert')}</span></td>`;
+    });
+    h+='</tr>';
+  });
+  return h+'</tbody></table>';
+}
+function wireMatrix(v,L){
+  const cells=[...v.querySelectorAll('.mx .cell')];
+  if(!cells.length)return;
+  const first=v.querySelector('.mx .cell.is-sel')||v.querySelector('.mx .cell.pe:not(.dim)')||cells[0];first.tabIndex=0;
+  v.querySelectorAll('.mx [data-p]').forEach(b=>b.onclick=()=>openPerson(b.dataset.p));
+  cells.forEach(c=>{
+    if(c.dataset.t)c.onclick=()=>openTask(+c.dataset.t);
+    c.onkeydown=e=>{
+      let r=+c.dataset.r,k=+c.dataset.c;
+      if(e.key==='ArrowRight')k++;else if(e.key==='ArrowLeft')k--;else if(e.key==='ArrowDown')r++;else if(e.key==='ArrowUp')r--;
+      else if((e.key==='Enter'||e.key===' ')&&c.dataset.t){e.preventDefault();openTask(+c.dataset.t);return}else return;
+      e.preventDefault();const n=v.querySelector(`.mx .cell[data-r="${r}"][data-c="${k}"]`);
+      if(n){c.tabIndex=-1;n.tabIndex=0;n.focus()}
+    };
+  });
+}
+/* FLIP */
+function flipFirst(c){const m=new Map();c.querySelectorAll('[data-key]').forEach(e=>m.set(e.dataset.key,e.getBoundingClientRect()));return m}
+function flipPlay(c,before){
+  if(RM)return;
+  c.querySelectorAll('[data-key]').forEach(e=>{
+    e.classList.remove('enter');
+    const a=before.get(e.dataset.key),b=e.getBoundingClientRect();
+    if(a){const dx=a.left-b.left,dy=a.top-b.top;if(dx||dy)e.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:'none'}],{duration:380,easing:'cubic-bezier(.2,.8,.2,1)'})}
+    else e.animate([{opacity:0,transform:'scale(.96)'},{opacity:1,transform:'none'}],{duration:300,easing:'cubic-bezier(.2,.8,.2,1)'});
+  });
+}
+
+/* ═══════════════ VISTA: TAREAS (detalle) ═══════════════ */
+function tablaFiltrada(){
+  const f=state.tabla,q=f.q.trim().toLowerCase();
+  let l=scope().filter(t=>(!f.estado||est(t)===f.estado)&&(!f.persona||t.resp===f.persona)&&(!f.semana||t.semana===+f.semana)&&(!f.tema||t.temas.includes(f.tema))
+    &&(!q||[t.act,t.ent,t.resp,t.empresa,t.dia,fD(t.fecha),t.id,t.inicio,t.cierre].join(' ').toLowerCase().includes(q)));
+  const k=f.sort,dir=f.dir;
+  const key={fecha:t=>t.fecha+t.resp,resp:t=>t.resp+t.fecha,empresa:t=>t.empresa,act:t=>t.act.toLowerCase(),ent:t=>t.ent.toLowerCase(),estado:t=>(done(t)?'1':'0')+t.fecha,id:t=>String(t.fila).padStart(4,'0')}[k];
+  return l.sort((a,b)=>key(a)<key(b)?-dir:key(a)>key(b)?dir:0);
+}
+function renderTareas(v){
+  const base=scope(),f=state.tabla,s=stats(base);
+  const pc={'':s.t,Completada:s.c,Pendiente:s.p};
+  const dq=[];
+  const TT=TM();
+  const norm=TT.filter(t=>t.estado!==t.estadoFuente);
+  if(norm.length)dq.push(`${norm.length} fila con estado escrito distinto («${norm.map(t=>t.estado).join('», «')}», fila ${norm.map(t=>t.fila).join(', ')}): se cuenta como «Completada».`);
+  const miss=[];FECHAS_M().forEach(fe=>PEOPLE.forEach(p=>{if(!TT.some(t=>t.fecha===fe&&t.resp===p))miss.push(`${p} el ${fDs(fe)}`)}));
+  if(miss.length)dq.push(`Sin tarea registrada: ${miss.join(', ')}. Por eso el mes suma ${TT.length} y no ${FECHAS_M().length*PEOPLE.length} tareas.`);
+  const noEnt=TT.filter(t=>!t.ent);if(noEnt.length)dq.push(`${noEnt.length} tarea sin entregable (fila ${noEnt.map(t=>t.fila).join(', ')}): se muestra «Sin dato».`);
+  const c01=TT.filter(t=>/^01:00/.test(t.cierre));if(c01.length)dq.push(`Los viernes (${c01.length} filas) la rutina de cierre dice «01:00»; parece 1:00 p. m. Se deja como está en el Excel.`);
+  const sp=TT.filter(t=>/-\S/.test(t.empresa)&&!/ - /.test(t.empresa));if(sp.length)dq.push(`La columna «Empresa» mezcla «Incomelec - Suplec» e «Incomelec -Suplec» (${sp.length} filas); se tratan como la misma combinación.`);
+  dq.push('Encabezado «Incio» en el Excel (se lee como «Inicio»). Hay errores menores de digitación en «Actividades» que se conservan tal cual.');
+  {const pv=TT.filter(vencida).length;if(pv)dq.push(`${pv} pendiente${pv!==1?'s':''} con fecha ya pasada: el estado puede estar desactualizado en el Excel. Si se cerraron, márcalas desde su detalle (ajuste local) y actualiza el archivo.`);}
+
+  v.innerHTML=`
+  <div class="vhead"><h1 class="sr">Tareas</h1>
+    <button class="btn sec" id="btnCsv">${ic('download')}Descargar CSV</button></div>
+  <section class="card enter" aria-labelledby="h-tb">
+    <h2 id="h-tb" class="sr">Detalle de tareas</h2>
+    <div class="tools">
+      <div class="chips" role="group" aria-label="Estado">${[['','Todas'],['Completada','Completadas'],['Pendiente','Pendientes']].map(([k,l])=>`<button class="chip" aria-pressed="${f.estado===k}" data-e="${k}">${l}<span class="cnt">${pc[k]}</span></button>`).join('')}</div>
+      <label class="field">${ic('user')}<span class="sr">Responsable</span><select id="fp"><option value="">Todo el equipo</option>${PEOPLE.map(p=>`<option ${f.persona===p?'selected':''}>${p}</option>`).join('')}</select></label>
+      <label class="field">${ic('calendar')}<span class="sr">Semana</span><select id="fw"><option value="">Todo el mes</option>${WEEKS_M().map(w=>`<option value="${w.n}" ${+f.semana===w.n?'selected':''}>Semana ${w.n} · ${fDs(w.a)}–${fDs(w.b)}</option>`).join('')}</select></label>
+      <label class="field">${ic('layers')}<span class="sr">Labor</span><select id="ft"><option value="">Todas las labores</option>${THEMES.map(t=>`<option value="${t.k}" ${f.tema===t.k?'selected':''}>${t.l}</option>`).join('')}</select></label>
+      <label class="field" style="flex:1;min-width:200px">${ic('search')}<span class="sr">Buscar en la tabla</span><input id="fq" type="search" placeholder="Buscar en actividades, entregables…" value="${esc(f.q)}"></label>
+      <button class="btn sec sm" id="fclr">${ic('rotate-ccw')}Limpiar</button>
+    </div>
+    <div style="display:flex;align-items:center;margin-bottom:6px"><span class="tcount" id="tcount" aria-live="polite"></span></div>
+    <div class="tbl-wrap"><table class="dt"><thead><tr>
+      ${[['id','Fila'],['fecha','Fecha'],['resp','Responsable'],['empresa','Empresa'],['act','Actividades'],['ent','Entregable'],['estado','Estado']].map(([k,l])=>`<th aria-sort="${f.sort===k?(f.dir>0?'ascending':'descending'):'none'}"><button data-sort="${k}">${l}${ic(f.sort===k?(f.dir>0?'arrow-up':'arrow-down'):'arrow-up-down')}</button></th>`).join('')}
+    </tr></thead><tbody id="tb"></tbody></table></div>
+  </section>
+  <section class="card enter" style="--i:1;margin-top:18px">
+    <details class="dq"><summary>${ic('triangle-alert')}Calidad del dato · ${dq.length} observaciones${ic('chevron-down')}</summary><ul>${dq.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>
+  </section>`;
+  fillTable(v);
+  v.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{state.tabla.estado=b.dataset.e;v.querySelectorAll('[data-e]').forEach(x=>x.setAttribute('aria-pressed',x===b));fillTable(v)});
+  v.querySelector('#fp').onchange=e=>{state.tabla.persona=e.target.value;fillTable(v)};
+  v.querySelector('#fw').onchange=e=>{state.tabla.semana=e.target.value;fillTable(v)};
+  v.querySelector('#ft').onchange=e=>{state.tabla.tema=e.target.value;fillTable(v)};
+  v.querySelector('#fq').oninput=e=>{state.tabla.q=e.target.value;fillTable(v)};
+  v.querySelector('#fclr').onclick=()=>{state.tabla={...state.tabla,estado:'',persona:'',semana:'',tema:'',q:''};renderTareas(v);icons()};
+  v.querySelectorAll('[data-sort]').forEach(b=>b.onclick=()=>{const k=b.dataset.sort;state.tabla.dir=state.tabla.sort===k?-state.tabla.dir:1;state.tabla.sort=k;renderTareas(v);icons();v.querySelector(`[data-sort="${k}"]`).focus()});
+  v.querySelector('#btnCsv').onclick=()=>{
+    const rows=[['Fila','Fecha','Día','Responsable','Empresa','Inicio','Actividades','Entregable','Rutina de cierre','Estado (Excel)','Estado (dashboard)']].concat(tablaFiltrada().map(t=>[t.fila,t.fecha,t.dia,t.resp,t.empresa,t.inicio,t.act,t.ent,t.cierre,t.estado,est(t)]));
+    const csv='﻿'+rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(';')).join('\n');
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`tareas-contabilidad-${state.mes}.csv`;a.click();
+    toast(`CSV descargado · ${rows.length-1} filas`);
+  };
+}
+function fillTable(v){
+  const l=tablaFiltrada();
+  v.querySelector('#tcount').textContent=`Mostrando ${l.length} de ${scope().length} tareas`;
+  v.querySelector('#tb').innerHTML=l.length?l.map(t=>`<tr tabindex="0" data-t="${t.i}" class="${state.sel?.type==='task'&&state.sel.id===t.i?'is-sel':''}" aria-label="Fila ${t.fila}: ${esc(t.act)}, ${t.resp}, ${fD(t.fecha)}, ${est(t)}">
+    <td class="id num">${t.fila}<small>Excel</small></td>
+    <td style="white-space:nowrap"><b>${fDs(t.fecha)}</b><br><span style="color:var(--tx3);font-size:12px">${cap(t.dia)} · S${t.semana}</span></td>
+    <td><span class="who">${av(t.resp)}${t.resp}</span></td>
+    <td>${emPills(t)}</td>
+    <td class="act">${esc(t.act)}</td>
+    <td class="ent">${t.ent?esc(t.ent):'<span class="pill neu">Sin dato</span>'}</td>
+    <td>${pillEst(t)}${state.overrides[t.id]?'<span class="local">Ajuste local</span>':''}</td></tr>`).join('')
+    :`<tr><td colspan="7" class="empty">Ninguna tarea coincide con estos filtros.</td></tr>`;
+  v.querySelectorAll('#tb tr[data-t]').forEach(r=>{r.onclick=()=>openTask(+r.dataset.t);r.onkeydown=e=>{
+    if(e.key==='Enter'){openTask(+r.dataset.t)}
+    if(e.key==='ArrowDown'){r.nextElementSibling?.focus();e.preventDefault()}
+    if(e.key==='ArrowUp'){r.previousElementSibling?.focus();e.preventDefault()}
+  }});
+  icons();
+}
+
+/* ═══════════════ INSPECTOR ═══════════════ */
+let lastFocus=null;
+function openInsp(type,title,sub,body){
+  if(!$('#insp').classList.contains('on'))lastFocus=document.activeElement;
+  $('#inspType').textContent=type;$('#inspTitle').textContent=title;$('#inspSub').innerHTML=sub;
+  $('#inspBody').innerHTML=body;$('#inspBody').scrollTop=0;
+  $('#insp').classList.add('on');$('#insp').setAttribute('aria-hidden','false');$('#inspBg').classList.add('on');
+  icons();countUp($('#inspBody'));
+  setTimeout(()=>$('#inspClose').focus(),RM?0:60);
+}
+function closeInsp(){
+  $('#insp').classList.remove('on');$('#insp').setAttribute('aria-hidden','true');$('#inspBg').classList.remove('on');
+  if(lastFocus&&document.body.contains(lastFocus))lastFocus.focus();
+}
+$('#inspClose').onclick=closeInsp;$('#inspBg').onclick=closeInsp;
+$('#insp').addEventListener('keydown',e=>{ // trampa de foco
+  if(e.key!=='Tab')return;const f=[...$('#insp').querySelectorAll('button,[tabindex="0"],a,input,select')].filter(x=>x.offsetParent);
+  if(!f.length)return;const a=f[0],z=f[f.length-1];
+  if(e.shiftKey&&document.activeElement===a){z.focus();e.preventDefault()}else if(!e.shiftKey&&document.activeElement===z){a.focus();e.preventDefault()}
+});
+function miniTable(list,showResp=true){
+  return `<div class="tbl-wrap"><table class="dt"><thead><tr><th>Fecha</th>${showResp?'<th>Responsable</th>':''}<th>Actividad · entregable</th><th>Estado</th></tr></thead><tbody>
+  ${[...list].sort((a,b)=>a.fecha.localeCompare(b.fecha)||a.resp.localeCompare(b.resp)).map(t=>`<tr tabindex="0" data-it="${t.i}"><td style="white-space:nowrap"><b>${fDs(t.fecha)}</b><br><span style="font-size:11.5px;color:var(--tx3)">Fila ${t.fila}</span></td>${showResp?`<td><span class="who">${av(t.resp)}${t.resp}</span></td>`:''}<td>${esc(t.act)}<br><span style="font-size:12px;color:var(--tx3)">${t.ent?esc(t.ent):'Sin dato'}</span></td><td>${pillEst(t)}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+function wireMini(){ $('#inspBody').querySelectorAll('[data-it]').forEach(r=>{r.onclick=()=>openTask(+r.dataset.it);r.onkeydown=e=>{if(e.key==='Enter')openTask(+r.dataset.it)}}) }
+function setSel(sel){ state.sel=sel; syncSel(); }
+function syncSel(){
+  document.querySelectorAll('.is-sel').forEach(e=>e.classList.remove('is-sel'));
+  const s=state.sel;if(!s)return;
+  if(s.type==='task'){
+    document.querySelectorAll(`#tb tr[data-t="${s.id}"], .mx .cell[data-t="${s.id}"]`).forEach(e=>{e.classList.add('is-sel');e.scrollIntoView({block:'nearest',inline:'nearest',behavior:RM?'auto':'smooth'})});
+  } else if(s.type==='person'){
+    document.querySelectorAll(`.pcard[data-key="${s.id}"], #view .row[data-p="${s.id}"]`).forEach(e=>e.classList.add('is-sel'));
+    document.querySelectorAll(`.mx tbody tr[data-row="${s.id}"]`).forEach(tr=>tr.classList.add('is-sel'));
+  }
+}
+function openSet(title,list,kind='Conjunto'){
+  const s=stats(list);setSel(null);
+  openInsp(kind.toUpperCase()+' · '+s.t+' TAREAS',title,`${s.c} completadas · ${s.p} pendientes${state.empresa?` · ${state.empresa}`:''}`,
+    `<div class="mk"><div class="subc"><b>${cnt(s.t)}</b><span>Tareas</span></div><div class="subc"><b>${cnt(s.c)}</b><span>Completadas</span></div><div class="subc"><b style="color:${s.p?'var(--bad)':'inherit'}">${cnt(s.p)}</b><span>Pendientes</span></div></div>
+     <div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--tx2);margin-bottom:6px"><span>Cumplimiento</span><b class="num">${nf(s.r,1)}%</b></div>${progBar(s.c,s.t)}</div>
+     ${list.length?miniTable(list):'<p class="empty">Sin tareas.</p>'}`);
+  wireMini();
+}
+function openPerson(p){
+  const P=DATA.personas[p],l=scopeBase().filter(t=>t.resp===p),s=stats(l);
+  setSel({type:'person',id:p});
+  const th=THEMES.map(t=>({t,n:l.filter(x=>x.temas.includes(t.k)).length})).filter(x=>x.n).sort((a,b)=>b.n-a.n).slice(0,4);
+  openInsp('PERSONA · '+P.ini,p,`${esc(P.rol)} · ${[...new Set(l.flatMap(t=>t.emps))].join(', ')}`,
+    `<div>${s.p?`<span class="pill bad">${ic('circle-alert')}${s.p} pendiente${s.p!==1?'s':''} — ${s.v} vencida${s.v!==1?'s':''}</span>`:`<span class="pill ok">${ic('circle-check')}Al día: todas sus tareas del mes están cerradas</span>`}</div>
+     <div class="mk"><div class="subc"><b>${cnt(s.t)}</b><span>Tareas</span></div><div class="subc"><b>${cnt(s.c)}</b><span>Completadas</span></div><div class="subc"><b>${cnt(s.r,1,'%')}</b><span>Cumplimiento</span></div></div>
+     ${progBar(s.c,s.t)}
+     <dl class="kv"><dt>Foco diario</dt><dd>${esc(P.foco)}</dd><dt>Labores más frecuentes</dt><dd>${th.map(x=>`<span class="ep">${x.t.l} · ${x.n}</span>`).join('')||'—'}</dd></dl>
+     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sec sm" id="toTable">${ic('table')}Abrir en la tabla</button></div>
+     ${miniTable(l,false)}`);
+  wireMini();
+  $('#toTable').onclick=()=>{closeInsp();state.tabla={...state.tabla,persona:p,estado:'',semana:'',tema:'',q:''};if(state.view==='tareas'){renderView()}else go('tareas')};
+}
+function openTask(i){
+  const t=T[i],P=DATA.personas[t.resp];setSel({type:'task',id:i});
+  const ok=done(t),ov=state.overrides[t.id];
+  const desc=ok?(ov?'Marcada como completada en este navegador (en el Excel sigue pendiente).':'Registrada como completada en el Excel.')
+    :vencida(t)?`Programada para el ${fD(t.fecha)}; lleva ${diasV(t)} días sin cerrarse.`:'Aún dentro de su fecha.';
+  openInsp(`TAREA · FILA ${t.fila} DEL EXCEL`,t.act,`${cap(t.dia)} ${fD(t.fecha)} · Semana ${t.semana} · ${t.resp}`,
+    `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${pillEst(t)}${ov?'<span class="local">Ajuste local</span>':''}<span style="font-size:13px;color:var(--tx2)">${desc}</span></div>
+     <dl class="kv">
+       <dt>Responsable</dt><dd><span class="who">${av(t.resp)}<span><b>${t.resp}</b><br><span style="font-size:12px;color:var(--tx3)">${esc(P.rol)}</span></span></span></dd>
+       <dt>Empresa</dt><dd>${emPills(t)}</dd>
+       <dt>Actividades</dt><dd>${esc(t.act)}</dd>
+       <dt>Entregable</dt><dd>${t.ent?esc(t.ent):'<span class="pill neu">Sin dato</span>'}</dd>
+       <dt>Inicio</dt><dd>${esc(t.inicio)}</dd>
+       <dt>Rutina de cierre</dt><dd>${esc(t.cierre)}</dd>
+       <dt>Estado en Excel</dt><dd>${esc(t.estado)}</dd>
+       <dt>Labores</dt><dd>${t.temas.map(k=>`<span class="ep">${THEMES.find(x=>x.k===k).l}</span>`).join('')||'Sin clasificar'}</dd>
+     </dl>
+     ${t.flags.map(f=>`<div class="note">${ic('triangle-alert')}<span>${esc(f)}</span></div>`).join('')}
+     <div style="display:flex;gap:8px;flex-wrap:wrap">
+       ${!ok?`<button class="btn acc" id="mark">${ic('check')}Marcar como completada</button>`:''}
+       ${ov?`<button class="btn sec" id="revert">${ic('rotate-ccw')}Volver al dato del Excel</button>`:''}
+       <button class="btn sec" id="seePerson">${ic('user')}Ver a ${t.resp}</button>
+     </div>
+     ${!ok||ov?'<p style="font-size:12px;color:var(--tx3)">Los ajustes se guardan solo en este navegador y no modifican el Excel.</p>':''}
+     <div><div class="lbl" style="font-size:11.5px;font-weight:650;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Mismo día, todo el equipo</div>${miniTable(T.filter(x=>x.fecha===t.fecha))}</div>`);
+  wireMini();
+  const m=$('#mark');if(m)m.onclick=()=>setOverride(t,'Completada');
+  const r=$('#revert');if(r)r.onclick=()=>setOverride(t,null);
+  $('#seePerson').onclick=()=>openPerson(t.resp);
+}
+function setOverride(t,val){
+  const prev=state.overrides[t.id]||null;
+  const apply=v=>{ if(v)state.overrides[t.id]=v;else delete state.overrides[t.id]; store.set('ov',state.overrides); renderAll(true); if($('#insp').classList.contains('on')&&state.sel?.type==='task'&&state.sel.id===t.i)openTask(t.i); };
+  apply(val);
+  toast(val?`Tarea del ${fDs(t.fecha)} marcada como completada`:`Tarea del ${fDs(t.fecha)} vuelve a su estado del Excel`,()=>apply(prev));
+}
+
+/* ═══════════════ TOAST ═══════════════ */
+function toast(msg,undo){
+  const box=$('#toasts');while(box.children.length>=2)box.firstElementChild.remove();
+  const el=document.createElement('div');el.className='toast';
+  el.innerHTML=`<span class="dot"></span><span>${esc(msg)}</span>${undo?'<button>Deshacer</button>':''}`;
+  if(undo)el.querySelector('button').onclick=()=>{undo();el.remove()};
+  box.appendChild(el);setTimeout(()=>el.remove(),undo?4500:2800);
+}
+
+/* ═══════════════ RENDER ═══════════════ */
+let prevCounts={};
+function renderView(keepCounts){
+  const v=$('#view');
+  ({resumen:renderResumen,equipo:renderEquipo,tareas:renderTareas})[state.view](v);
+  v.setAttribute('aria-labelledby','tab-'+state.view);
+  if(keepCounts) v.querySelectorAll('.enter').forEach(e=>e.classList.remove('enter'));
+  // contadores: desde el valor anterior si cambió el estado
+  v.querySelectorAll('[data-count]').forEach((el,i)=>{const k=state.view+i;if(keepCounts&&prevCounts[k]!=null)el.dataset.from=prevCounts[k];prevCounts[k]=+el.dataset.count});
+  icons();countUp(v);syncSel();
+}
+function renderAll(keep){ renderTabs();renderCtx();renderView(keep); }
+
+/* ═══════════════ INICIO ═══════════════ */
+applyTheme();icons();renderAll();
+let rT;addEventListener('resize',()=>{moveInd();clearTimeout(rT);rT=setTimeout(()=>{if(state.view==='resumen')renderView(true)},200)});
+document.fonts&&document.fonts.ready.then(moveInd);
+</script>
+</body>
+</html>
